@@ -2,25 +2,25 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const bcrpyt = require('bcryptjs')
 
-const User = require('../models/users')
+const Doctor = require('../models/doctor')
 const sendEmail = require('../shared/email').sendEmail
 
-const userRouter = express.Router()
-userRouter.use(bodyParser.json())
+const doctorRouter = express.Router()
+doctorRouter.use(bodyParser.json())
 
-userRouter.get('/', (req, res, next) => {
-    User.find({})
-      .then((users) => {
-          res.status(200).send(users)
+doctorRouter.get('/', (req, res, next) => {
+    Doctor.find({})
+      .then((doctors) => {
+          res.status(200).send(doctors)
       }, (err) => next(err))
       .catch((err) => next(err))
 })
 
-userRouter.post('/signup', (req, res, next) => {
-    User.findOne({ username: req.body.username })
-      .then(async (user) => {
-        if(user){
-          if(user.activated || user.email !== req.body.email)
+doctorRouter.post('/signup', (req, res, next) => {
+    Doctor.findOne({ username: req.body.username })
+      .then(async (doctor) => {
+        if(doctor){
+          if(doctor.activated || doctor.email !== req.body.email)
             res.status(200).send("Username already exists!")
           else {
             const salt = await bcrpyt.genSalt()
@@ -29,23 +29,23 @@ userRouter.post('/signup', (req, res, next) => {
             for(var i=1;i<=6;i++) 
               otp += Math.floor(Math.random() * 10)
             const hashedOtp = await bcrpyt.hash(otp, 10)
-            user.otp = hashedOtp
-            user.password = hashedPassword
-            user.save()
-              .then((user) => {
-                User.findById(user._id)
-                  .then((user) => {
-                      sendEmail(user.email, otp)
-                      res.status(200).send(user)
+            doctor.otp = hashedOtp
+            doctor.password = hashedPassword
+            doctor.save()
+              .then((doctor) => {
+                Doctor.findById(doctor._id)
+                  .then((doctor) => {
+                      sendEmail(doctor.email, otp)
+                      res.status(200).send(doctor)
                   })
               }, (err) => next(err))
           }
         }
         else {
-          User.findOne({ email: req.body.email })
-            .then(async (user) => {
-                if(user){
-                  if(user.activated)
+          Doctor.findOne({ email: req.body.email })
+            .then(async (doctor) => {
+                if(doctor){
+                  if(doctor.activated)
                     res.status(200).send("Email already registered!")
                   else {
                     const salt = await bcrpyt.genSalt()
@@ -54,15 +54,15 @@ userRouter.post('/signup', (req, res, next) => {
                     for(var i=1;i<=6;i++) 
                       otp += Math.floor(Math.random() * 10)
                     const hashedOtp = await bcrpyt.hash(otp, 10)
-                    user.otp = hashedOtp
-                    user.username = req.body.username
-                    user.password = hashedPassword
-                    user.save()
-                      .then((user) => {
-                        User.findById(user._id)
-                          .then((user) => {
+                    doctor.otp = hashedOtp
+                    doctor.username = req.body.username
+                    doctor.password = hashedPassword
+                    doctor.save()
+                      .then((doctor) => {
+                        Doctor.findById(doctor._id)
+                          .then((doctor) => {
                               sendEmail(req.body.email, otp)
-                              res.status(200).send(user)
+                              res.status(200).send(doctor)
                           }); 
                       }, (err) => next(err))
                   }
@@ -74,19 +74,21 @@ userRouter.post('/signup', (req, res, next) => {
                   for(var i=1;i<=6;i++) 
                     otp += Math.floor(Math.random() * 10)
                   const hashedOtp = await bcrpyt.hash(otp, 10)
-                  user = { 
+                  doctor = { 
                       username: req.body.username,
                       password: hashedPassword,
                       email: req.body.email,
                       otp: hashedOtp,
-                      activated: false
+                      activated: false,
+                      specialization: req.body.specialization,
+                      mobile: req.body.mobile
                   }
-                  User.create(user)
-                   .then((user) => {
-                     User.findById(user._id)
-                       .then((user) => {
+                  Doctor.create(doctor)
+                   .then((doctor) => {
+                     Doctor.findById(doctor._id)
+                       .then((doctor) => {
                           sendEmail(req.body.email, otp)
-                          res.status(200).send(user)
+                          res.status(200).send(doctor)
                         }) 
                         .catch((err) => next(err))
                     }, (err) => next(err))
@@ -99,25 +101,25 @@ userRouter.post('/signup', (req, res, next) => {
       .catch((err) => next(err))
 })
 
-userRouter.post('/login', (req, res, next) => {
-    User.findOne({ username: req.body.userId })
-      .then(async (user) => {
-          if(user){
-            if(!user.activated)
+doctorRouter.post('/login', (req, res, next) => {
+    Doctor.findOne({ username: req.body.userId })
+      .then(async (doctor) => {
+          if(doctor){
+            if(!doctor.activated)
               res.status(200).send({resCode: -1, msg: 'Invalid User'})
-            else if(await bcrpyt.compare(req.body.password, user.password))
-              res.status(200).send({resCode: 1, msg: 'Logged in', userId: user._id, username: user.username})
+            else if(await bcrpyt.compare(req.body.password, doctor.password))
+              res.status(200).send({resCode: 1, msg: 'Logged in', userId: doctor._id, username: doctor.username})
             else
               res.status(200).send({resCode: 0, msg: 'Invalid Password'})
           }
           else{
-            User.findOne({ email: req.body.userId })
-              .then(async (user) => {
-                if(user){
-                  if(!user.activated)
+            Doctor.findOne({ email: req.body.userId })
+              .then(async (doctor) => {
+                if(doctor){
+                  if(!doctor.activated)
                     res.status(200).send({resCode: -1, msg: 'Invalid User'})
-                  else if(await bcrpyt.compare(req.body.password, user.password))
-                    res.status(200).send({resCode: 1, msg: 'Logged in', userId: user._id, username: user.username})
+                  else if(await bcrpyt.compare(req.body.password, doctor.password))
+                    res.status(200).send({resCode: 1, msg: 'Logged in', userId: doctor._id, username: doctor.username})
                   else
                     res.status(200).send({resCode: 0, msg: 'Invalid Password'})
                 }
@@ -130,14 +132,14 @@ userRouter.post('/login', (req, res, next) => {
       .catch((err) => next(err))
 })
 
-userRouter.post('/otp', (req, res, next) => {
-	User.findOne({ _id: req.body.userId })
-	  .then(async (user) => {
-		  if(await bcrpyt.compare(req.body.otp, user.otp)){
-			  user.activated = true
-			  user.otp = null
-			  user.save()
-			   .then((user) => {
+doctorRouter.post('/otp', (req, res, next) => {
+	Doctor.findOne({ _id: req.body.userId })
+	  .then(async (doctor) => {
+		  if(await bcrpyt.compare(req.body.otp, doctor.otp)){
+			  doctor.activated = true
+			  doctor.otp = null
+			  doctor.save()
+			   .then((doctor) => {
 				   res.status(200).send("User account activated!")
 			   }, (err) => next(err))
 			   .catch((err) => next(err))
@@ -148,4 +150,4 @@ userRouter.post('/otp', (req, res, next) => {
     .catch((err) => next(err))
 })
 
-module.exports = userRouter
+module.exports = doctorRouter

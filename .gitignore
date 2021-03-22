@@ -1,3 +1,5 @@
 node_modules
 request.rest
 mongo_connect.txt
+
+shared/credentials.js

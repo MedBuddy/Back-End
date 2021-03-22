@@ -7,10 +7,12 @@ const mongoose = require('mongoose')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var doctorRouter = require('./routes/doctorRouter');
 
 var app = express();
 
-const connect = mongoose.connect('mongodb://localhost:27017/MedBuddy')
+const { db_user, db_password } = require('./shared/credentials')
+const connect = mongoose.connect(`mongodb+srv://${db_user}:${db_password}@medbuddy.sd9b2.mongodb.net/Main?retryWrites=true&w=majority`)
 
 connect.then((db) => {
     console.log("\nDatabase connected!")
@@ -28,6 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/doctors', doctorRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
