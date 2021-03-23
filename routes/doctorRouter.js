@@ -80,8 +80,7 @@ doctorRouter.post('/signup', (req, res, next) => {
                       email: req.body.email,
                       otp: hashedOtp,
                       activated: false,
-                      specialization: req.body.specialization,
-                      mobile: req.body.mobile
+                      verified: false
                   }
                   Doctor.create(doctor)
                    .then((doctor) => {
@@ -148,6 +147,14 @@ doctorRouter.post('/otp', (req, res, next) => {
 		    res.status(200).send("Invalid OTP")
 	  }, (err) => next(err))
     .catch((err) => next(err))
+})
+
+doctorRouter.delete('/deleteAccount', (req, res, next) => {
+    Doctor.findByIdAndDelete(req.body.userId)
+      .then((doctor) => {
+          res.status(200).send(doctor)
+      }, (err) => next(err))
+      .catch((err) => next(err))
 })
 
 module.exports = doctorRouter

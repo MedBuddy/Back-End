@@ -148,4 +148,12 @@ userRouter.post('/otp', (req, res, next) => {
     .catch((err) => next(err))
 })
 
+userRouter.delete('/deleteAccount', (req, res, next) => {
+    User.findByIdAndDelete(req.body.userId)
+      .then((user) => {
+          res.status(200).send(user)
+      }, (err) => next(err))
+      .catch((err) => next(err))
+})
+
 module.exports = userRouter

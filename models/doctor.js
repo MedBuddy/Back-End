@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const { host } = require('../shared/host')
 
 const Doctor = new Schema({
     username: {
@@ -20,16 +21,43 @@ const Doctor = new Schema({
     activated: {
         type: Boolean
     },
-    image: {
+    verified: {
+        type: Boolean
+    },
+    license: {
         type: String
+    },
+    image: {
+        type: String,
+        default: host + '/images/user-default.jpg'
+    },
+    firstname: {
+        type: String,
+        default: ''
+    },
+    lastname: {
+        type: String,
+        default: ''
     },
     specialization: {
         type: String,
-        required: true
+        default: ''
+    },
+    dob: {
+        type: Date,
+        default: new Date()
+    },
+    gender: {
+        type: String,
+        default: ''
+    },
+    bloodgroup: {
+        type: String,
+        default: ''
     },
     mobile: {
         type: String,
-        required: true
+        default: ''
     }
 },{
     timestamps: true

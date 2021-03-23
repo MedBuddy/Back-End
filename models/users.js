@@ -20,8 +20,33 @@ const User = new Schema({
     activated: {
         type: Boolean
     },
+    firstname: {
+        type: String,
+        default: ''
+    },
+    lastname: {
+        type: String,
+        default: ''
+    },
     image: {
-        type: String
+        type: String,
+        default: '/images/user-default.jpg'
+    },
+    dob: {
+        type: Date,
+        default: new Date()
+    },
+    gender: {
+        type: String,
+        default: ''
+    },
+    mobile: {
+        type: String,
+        default: ''
+    },
+    bloodgroup: {
+        type: String,
+        default: ''
     }
 },{
     timestamps: true
