@@ -1,12 +1,33 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const bcrpyt = require('bcryptjs')
+const multer = require('multer')
+const { host } = require('../shared/host')
 
 const Doctor = require('../models/doctor')
+const Admin = require('../models/admin')
 const sendEmail = require('../shared/email').sendEmail
 
 const doctorRouter = express.Router()
 doctorRouter.use(bodyParser.json())
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, __dirname+'/../public/licenses')
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname)
+    }
+})
+
+const pdfFileFilter = (req, file, cb) => {
+    if(!file.originalname.match(/\.pdf$/)) {
+        return cb(new Error('You can upload only PDF files!'), false)
+    }
+    cb(null, true)
+}
+
+const upload = multer({ storage: storage, fileFilter: pdfFileFilter, limits: { fileSize: 5*1000000 } })
 
 doctorRouter.get('/', (req, res, next) => {
     Doctor.find({})
@@ -149,12 +170,44 @@ doctorRouter.post('/otp', (req, res, next) => {
     .catch((err) => next(err))
 })
 
+doctorRouter.post('/license', upload.single('license'), (req, res, next) => {
+    if(req.file){
+        console.log('File received!')
+        Doctor.findByIdAndUpdate(req.body.userId, { license: host + '/licenses/' + req.file['filename'] })
+            .then((profile) => {
+              res.status(200).send(profile)
+            }, (err) => next(err))
+            .catch((err) => next(err))
+    }
+    else{
+        console.log('No File received!')
+        res.status(200).send('Nothing!')
+    }
+})
+
 doctorRouter.delete('/deleteAccount', (req, res, next) => {
     Doctor.findByIdAndDelete(req.body.userId)
       .then((doctor) => {
           res.status(200).send(doctor)
       }, (err) => next(err))
       .catch((err) => next(err))
+})
+
+doctorRouter.post('/unverified', (req, res, next) => {
+    Admin.findById(req.body.userId)
+        .then((admin) => {
+            if(admin){
+                Doctor.find({ verified: false })
+                    .then((doctors) => {
+                        res.status(200).send(doctors)
+                    }, (err) => next(err))
+                    .catch((err) => next(err))
+            }
+            else{
+                res.status(401).send('Not an Admin!')
+            }
+        }, (err) => next(err))
+        .catch((err) => next(err))
 })
 
 module.exports = doctorRouter

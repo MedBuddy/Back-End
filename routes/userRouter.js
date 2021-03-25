@@ -3,15 +3,33 @@ const bodyParser = require('body-parser')
 const bcrpyt = require('bcryptjs')
 
 const User = require('../models/users')
+const Admin = require('../models/admin')
 const sendEmail = require('../shared/email').sendEmail
 
 const userRouter = express.Router()
 userRouter.use(bodyParser.json())
 
-userRouter.get('/', (req, res, next) => {
+/* userRouter.get('/', (req, res, next) => {
     User.find({})
       .then((users) => {
           res.status(200).send(users)
+      }, (err) => next(err))
+      .catch((err) => next(err))
+}) */
+
+userRouter.post('/', (req, res, next) => {
+  Admin.findById(req.body.userId)
+      .then((admin) => {
+          if(admin){
+              User.find({})
+                  .then((users) => {
+                      res.status(200).send(users)
+                  }, (err) => next(err))
+                  .catch((err) => next(err))
+          }
+          else{
+              res.status(401).send('Not an Admin!')
+          }
       }, (err) => next(err))
       .catch((err) => next(err))
 })

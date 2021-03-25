@@ -25,7 +25,8 @@ const Doctor = new Schema({
         type: Boolean
     },
     license: {
-        type: String
+        type: String,
+        default: ''
     },
     image: {
         type: String,

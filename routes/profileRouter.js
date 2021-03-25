@@ -91,7 +91,7 @@ profileRouter.put('/imageUpload/user', userUpload.single('image'), (req, res, ne
 profileRouter.put('/imageUpload/doctor', doctorUpload.single('image'), (req, res, next) => {
     if(req.file){
         console.log('File received!')
-        Doctor.findByIdAndUpdate(req.body.userId, { image: host + '/images/users/' + req.file['filename'] })
+        Doctor.findByIdAndUpdate(req.body.userId, { image: host + '/images/doctors/' + req.file['filename'] })
             .then((profile) => {
                 res.status(200).send(profile)
             }, (err) => next(err))
