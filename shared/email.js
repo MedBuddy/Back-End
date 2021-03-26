@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer')
 const { email, password } = require('./credentials')
 
-function sendEmail(receiver, otp){
+function sendEmail(receiver, subject, msg){
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -12,8 +12,8 @@ function sendEmail(receiver, otp){
 	const mailOptions = {
 		from: email,
 		to: receiver,
-		subject: 'MedBuddy Account Activation',
-		text: 'Your OTP for account activation is ' + otp
+		subject: subject,
+		text: msg
 	}
 	transporter.sendMail(mailOptions, (error, info) => {
 		if (error) 

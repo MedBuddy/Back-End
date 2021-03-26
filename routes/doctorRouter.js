@@ -56,7 +56,7 @@ doctorRouter.post('/signup', (req, res, next) => {
               .then((doctor) => {
                 Doctor.findById(doctor._id)
                   .then((doctor) => {
-                      sendEmail(doctor.email, otp)
+                      sendEmail(doctor.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
                       res.status(200).send(doctor)
                   })
               }, (err) => next(err))
@@ -82,7 +82,7 @@ doctorRouter.post('/signup', (req, res, next) => {
                       .then((doctor) => {
                         Doctor.findById(doctor._id)
                           .then((doctor) => {
-                              sendEmail(req.body.email, otp)
+                              sendEmail(req.body.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
                               res.status(200).send(doctor)
                           }); 
                       }, (err) => next(err))
@@ -107,7 +107,7 @@ doctorRouter.post('/signup', (req, res, next) => {
                    .then((doctor) => {
                      Doctor.findById(doctor._id)
                        .then((doctor) => {
-                          sendEmail(req.body.email, otp)
+                          sendEmail(req.body.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
                           res.status(200).send(doctor)
                         }) 
                         .catch((err) => next(err))

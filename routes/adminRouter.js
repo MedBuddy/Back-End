@@ -7,6 +7,7 @@ adminRouter.use(bodyParser.json())
 
 const Admin = require('../models/admin')
 const Doctor = require('../models/doctor')
+const sendEmail = require('../shared/email').sendEmail
 
 adminRouter.get('/', (req, res, next) => {
     Admin.find({})
@@ -86,6 +87,7 @@ adminRouter.put('/verifyDoctor', (req, res, next) => {
             if(admin){
                 Doctor.findByIdAndUpdate(req.body.doctorId, { verified: true })
                     .then((doctor) => {
+                        sendEmail(doctor.email, 'MedBuddy License Verification', 'Your doctor\'s license has been verified!')
                         res.status(200).send(doctor)
                     }, (err) => next(err))
                     .catch((err) => next(err))

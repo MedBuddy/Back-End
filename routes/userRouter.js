@@ -53,7 +53,7 @@ userRouter.post('/signup', (req, res, next) => {
               .then((user) => {
                 User.findById(user._id)
                   .then((user) => {
-                      sendEmail(user.email, otp)
+                      sendEmail(user.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
                       res.status(200).send(user)
                   })
               }, (err) => next(err))
@@ -79,7 +79,7 @@ userRouter.post('/signup', (req, res, next) => {
                       .then((user) => {
                         User.findById(user._id)
                           .then((user) => {
-                              sendEmail(req.body.email, otp)
+                              sendEmail(req.body.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
                               res.status(200).send(user)
                           }); 
                       }, (err) => next(err))
@@ -103,7 +103,7 @@ userRouter.post('/signup', (req, res, next) => {
                    .then((user) => {
                      User.findById(user._id)
                        .then((user) => {
-                          sendEmail(req.body.email, otp)
+                          sendEmail(req.body.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
                           res.status(200).send(user)
                         }) 
                         .catch((err) => next(err))
