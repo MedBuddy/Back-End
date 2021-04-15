@@ -28,6 +28,10 @@ const Doctor = new Schema({
         type: String,
         default: ''
     },
+    admin: {
+        type: Boolean,
+        default: false
+    },
     image: {
         type: String,
         default: host + '/images/user-default.jpg'

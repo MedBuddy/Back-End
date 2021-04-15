@@ -28,6 +28,10 @@ const User = new Schema({
         type: String,
         default: ''
     },
+    admin: {
+        type: Boolean,
+        default: false
+    },
     image: {
         type: String,
         default: '/images/user-default.jpg'

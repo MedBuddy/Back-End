@@ -6,7 +6,7 @@ const { host } = require('../shared/host')
 const profileRouter = express.Router()
 profileRouter.use(bodyParser.json())
 
-const User = require('../models/users')
+const User = require('../models/user')
 const Doctor = require('../models/doctor')
 
 const userStorage = multer.diskStorage({

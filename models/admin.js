@@ -26,6 +26,14 @@ const Admin = new Schema({
     lastname: {
         type: String,
         default: ''
+    },
+    activated: {
+        type: Boolean,
+        default: true
+    },
+    admin: {
+        type: Boolean,
+        default: true
     }
 },{
     timestamps: true

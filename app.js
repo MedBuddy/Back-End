@@ -6,6 +6,7 @@ var logger = require('morgan');
 const mongoose = require('mongoose')
 
 const indexRouter = require('./routes/index');
+const accountRouter = require('./routes/accountRouter')
 const userRouter = require('./routes/userRouter')
 const doctorRouter = require('./routes/doctorRouter')
 const profileRouter = require('./routes/profileRouter')
@@ -31,6 +32,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/account', accountRouter)
 app.use('/users', userRouter)
 app.use('/doctors', doctorRouter)
 app.use('/profile', profileRouter)
