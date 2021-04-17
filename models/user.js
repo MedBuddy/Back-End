@@ -28,9 +28,9 @@ const User = new Schema({
         type: String,
         default: ''
     },
-    admin: {
-        type: Boolean,
-        default: false
+    type: {
+        type: Number,
+        default: 1
     },
     image: {
         type: String,

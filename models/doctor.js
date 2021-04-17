@@ -28,9 +28,9 @@ const Doctor = new Schema({
         type: String,
         default: ''
     },
-    admin: {
-        type: Boolean,
-        default: false
+    type: {
+        type: Number,
+        default: 2
     },
     image: {
         type: String,

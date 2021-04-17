@@ -24,7 +24,7 @@ accountRouter.post('/login', (req, res, next) => {
             if(!account.activated)
               res.status(200).send({resCode: -1, msg: 'Invalid User'})
             else if(await bcrpyt.compare(req.body.password, account.password)){
-               const token = authenticate.getToken({ userId: account._id, admin: (req.body.type == 3) })
+               const token = authenticate.getToken({ userId: account._id, type: req.body.type })
                res.status(200).send({resCode: 1, msg: 'Logged in', token: token})
             }
             else
@@ -37,7 +37,7 @@ accountRouter.post('/login', (req, res, next) => {
                   if(!account.activated)
                     res.status(200).send({resCode: -1, msg: 'Invalid User'})
                   else if(await bcrpyt.compare(req.body.password, account.password)){
-                      const token = authenticate.getToken({ userId: account._id, admin: (req.body.type == 3) })
+                      const token = authenticate.getToken({ userId: account._id, type: req.body.type })
                       res.status(200).send({resCode: 1, msg: 'Logged in', token: token})
                   }
                   else
@@ -147,27 +147,27 @@ accountRouter.post('/otp', (req, res, next) => {
     if(req.body.type == 1) Account = User
     else if(req.body.type == 2) Account = Doctor
     else return res.sendStatus(403)
-	Account.findOne({ _id: req.body.userId })
-	  .then(async (account) => {
-		  if(await bcrpyt.compare(req.body.otp, account.otp)){
-			  account.activated = true
-			  account.otp = null
-			  account.save()
-			   .then((account) => {
-				   res.status(200).send("User account activated!")
-			   }, (err) => next(err))
-			   .catch((err) => next(err))
-		  }
-		  else
-		    res.status(200).send("Invalid OTP")
-	  }, (err) => next(err))
-    .catch((err) => next(err))
+    Account.findOne({ _id: req.body.userId })
+      .then(async (account) => {
+        if(await bcrpyt.compare(req.body.otp, account.otp)){
+          account.activated = true
+          account.otp = null
+          account.save()
+          .then((account) => {
+            res.status(200).send("User account activated!")
+          }, (err) => next(err))
+          .catch((err) => next(err))
+        }
+        else
+          res.status(200).send("Invalid OTP")
+      }, (err) => next(err))
+      .catch((err) => next(err))
 })
 
 accountRouter.delete('/deleteAccount', authenticate.verifyUser, (req, res, next) => {
     let Account
-    if(req.body.type == 1) Account = User
-    else if(req.body.type == 2) Account = Doctor
+    if(req.user.type == 1) Account = User
+    else if(req.user.type == 2) Account = Doctor
     else return res.sendStatus(403)
     Account.findByIdAndDelete(req.user.userId)
       .then((account) => {

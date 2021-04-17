@@ -31,10 +31,10 @@ const Admin = new Schema({
         type: Boolean,
         default: true
     },
-    admin: {
-        type: Boolean,
-        default: true
-    }
+    type: {
+        type: Number,
+        default: 3
+    },
 },{
     timestamps: true
 })

@@ -8,21 +8,16 @@ profileRouter.use(bodyParser.json())
 
 const User = require('../models/user')
 const Doctor = require('../models/doctor')
+const authenticate = require('../shared/authenticate')
 
-const userStorage = multer.diskStorage({
+const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, __dirname+'/../public/images/users')
+        let folder = (req.user.type == 1? 'users' : 'doctors')
+        cb(null, __dirname + '/../public/images/' + folder)
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname)
-    }
-})
-const doctorStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, __dirname+'/../public/images/doctors')
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname)
+        let filename = req.user.userId + file.originalname.substring(file.originalname.lastIndexOf('.'))
+        cb(null, filename)
     }
 })
 
@@ -33,65 +28,42 @@ const imageFileFilter = (req, file, cb) => {
     cb(null, true)
 }
 
-const userUpload = multer({ storage: userStorage, fileFilter: imageFileFilter })
-const doctorUpload = multer({ storage: doctorStorage, fileFilter: imageFileFilter })
+const upload = multer({ storage: storage, fileFilter: imageFileFilter })
 
 profileRouter.route('/details')
-.get((req, res, next) => {
-    let profile
-    if(req.body.type === 'user')
-        profile = User
-    else if(req.body.type === 'doctor')
-        profile = Doctor
-    profile.findById(req.body.userId)
+.get(authenticate.verifyUser, (req, res, next) => {
+    let Profile
+    if(req.user.type == 1) Profile = User
+    else if(req.user.type == 2) Profile = Doctor
+    else return res.sendStatus(403)
+    Profile.findById(req.user.userId)
         .then((profile) => {
             res.status(200).send(profile)
         }, (err) => next(err))
         .catch((err) => next(err))
 })
-.put((req, res, next) => {
-    let updates = {
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        gender: req.body.gender,
-        dob: req.body.dob,
-        mobile: req.body.mobile,
-        bloodgroup: req.body.bloodgroup
-    }
-    let profile
-    if(req.body.type === 'user'){
-        profile = User
-    }
-    else if(req.body.type === 'doctor'){
-        profile = Doctor
-        updates.specialization = req.body.specialization
-    }
-    profile.findByIdAndUpdate(req.body.userId, updates)
+.put(authenticate.verifyUser, (req, res, next) => {
+    let Profile
+    if(req.user.type == 1) Profile = User
+    else if(req.user.type == 2) Profile = Doctor
+    else return res.sendStatus(403)
+    Profile.findByIdAndUpdate(req.user.userId, req.body)
         .then((profile) => {
             res.status(200).send(profile)
         }, (err) => next(err))
         .catch((err) => next(err))
 })
 
-profileRouter.put('/imageUpload/user', userUpload.single('image'), (req, res, next) => {
+profileRouter.post('/imageUpload', authenticate.verifyUser, upload.single('image'), (req, res, next) => {
     if(req.file){
         console.log('File received!')
-        User.findByIdAndUpdate(req.body.userId, { image: host + '/images/users/' + req.file['filename'] })
-            .then((profile) => {
-                res.status(200).send(profile)
-            }, (err) => next(err))
-            .catch((err) => next(err))
-    }
-    else {
-        console.log('No file received!')
-        res.status(200).send('Nothing')
-    }
-})
-
-profileRouter.put('/imageUpload/doctor', doctorUpload.single('image'), (req, res, next) => {
-    if(req.file){
-        console.log('File received!')
-        Doctor.findByIdAndUpdate(req.body.userId, { image: host + '/images/doctors/' + req.file['filename'] })
+        let Profile
+        if(req.user.type == 1) Profile = User
+        else if(req.user.type == 2) Profile = Doctor
+        else return res.sendStatus(403)
+        Profile.findByIdAndUpdate(req.user.userId, { 
+                image: `${host}/images/${(req.user.type == 1? 'users':'doctors')}/${req.file['filename']}` 
+            })
             .then((profile) => {
                 res.status(200).send(profile)
             }, (err) => next(err))

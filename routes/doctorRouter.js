@@ -36,24 +36,15 @@ doctorRouter.get('/', authenticate.verifyUser, (req, res, next) => {
       .catch((err) => next(err))
 })
 
-doctorRouter.post('/unverified', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
-    Admin.findById(req.body.userId)
-        .then((admin) => {
-            if(admin){
-                Doctor.find({ verified: false })
-                    .then((doctors) => {
-                        res.status(200).send(doctors)
-                    }, (err) => next(err))
-                    .catch((err) => next(err))
-            }
-            else{
-                res.status(401).send('Not an Admin!')
-            }
+doctorRouter.get('/unverified', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+    Doctor.find({ verified: false })
+        .then((doctors) => {
+            res.status(200).send(doctors)
         }, (err) => next(err))
         .catch((err) => next(err))
 })
 
-doctorRouter.post('/license', authenticate.verifyUser, upload.single('license'), (req, res, next) => {
+doctorRouter.post('/license', authenticate.verifyUser, authenticate.verifyDoctor, upload.single('license'), (req, res, next) => {
     if(req.file){
         console.log('File received!')
         Doctor.findByIdAndUpdate(req.body.userId, { license: host + '/licenses/' + req.file['filename'] })
