@@ -59,7 +59,11 @@ adminRouter.put('/verifyDoctor', authenticate.verifyUser, authenticate.verifyAdm
     Doctor.findByIdAndUpdate(req.body.doctorId, { verified: true })
       .then((doctor) => {
           sendEmail(doctor.email, 'MedBuddy License Verification', 'Your doctor\'s license has been verified!')
-          res.status(200).send(doctor)
+          Doctor.findById(doctor._id)
+            .then((doctor) => {
+                res.status(200).send(doctor)
+            }, (err) => next(err))
+            .catch((err) => next(err))
       }, (err) => next(err))
       .catch((err) => next(err))
 })

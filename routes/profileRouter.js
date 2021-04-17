@@ -49,7 +49,11 @@ profileRouter.route('/details')
     else return res.sendStatus(403)
     Profile.findByIdAndUpdate(req.user.userId, req.body)
         .then((profile) => {
-            res.status(200).send(profile)
+            Profile.findById(profile._id)
+              .then((profile) => {
+                  res.status(200).send(profile)
+              }, (err) => next(err))
+              .catch((err) => next(err))
         }, (err) => next(err))
         .catch((err) => next(err))
 })
@@ -65,7 +69,11 @@ profileRouter.post('/imageUpload', authenticate.verifyUser, upload.single('image
                 image: `${host}/images/${(req.user.type == 1? 'users':'doctors')}/${req.file['filename']}` 
             })
             .then((profile) => {
-                res.status(200).send(profile)
+                Profile.findById(profile._id)
+                  .then((profile) => {
+                      res.status(200).send(profile)
+                  }, (err) => next(err))
+                  .catch((err) => next(err))
             }, (err) => next(err))
             .catch((err) => next(err))
     }

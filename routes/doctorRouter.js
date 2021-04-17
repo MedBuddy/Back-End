@@ -2,20 +2,20 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const { host } = require('../shared/host')
-const authenticate = require('../shared/authenticate')
 
 const Doctor = require('../models/doctor')
-const Admin = require('../models/admin')
+const authenticate = require('../shared/authenticate')
 
 const doctorRouter = express.Router()
 doctorRouter.use(bodyParser.json())
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, __dirname+'/../public/licenses')
+        cb(null, __dirname + '/../public/licenses')
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname)
+        let filename = req.user.userId + file.originalname.substring(file.originalname.lastIndexOf('.'))
+        cb(null, filename)
     }
 })
 
@@ -26,7 +26,7 @@ const pdfFileFilter = (req, file, cb) => {
     cb(null, true)
 }
 
-const upload = multer({ storage: storage, fileFilter: pdfFileFilter, limits: { fileSize: 5*1000000 } })
+const upload = multer({ storage: storage, fileFilter: pdfFileFilter, limits: { fileSize: 1 * 1024 * 1024 } })
 
 doctorRouter.get('/', authenticate.verifyUser, (req, res, next) => {
     Doctor.find({})
@@ -47,9 +47,13 @@ doctorRouter.get('/unverified', authenticate.verifyUser, authenticate.verifyAdmi
 doctorRouter.post('/license', authenticate.verifyUser, authenticate.verifyDoctor, upload.single('license'), (req, res, next) => {
     if(req.file){
         console.log('File received!')
-        Doctor.findByIdAndUpdate(req.body.userId, { license: host + '/licenses/' + req.file['filename'] })
+        Doctor.findByIdAndUpdate(req.user.userId, { license: host + '/licenses/' + req.file['filename'] })
             .then((profile) => {
-              res.status(200).send(profile)
+                Doctor.findById(profile._id)
+                  .then((profile) => {
+                      res.status(200).send(profile)
+                  }, (err) => next(err))
+                  .catch((err) => next(err))
             }, (err) => next(err))
             .catch((err) => next(err))
     }
