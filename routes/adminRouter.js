@@ -7,6 +7,7 @@ adminRouter.use(bodyParser.json())
 
 const Admin = require('../models/admin')
 const Doctor = require('../models/doctor')
+
 const sendEmail = require('../shared/email').sendEmail
 const authenticate = require('../shared/authenticate')
 

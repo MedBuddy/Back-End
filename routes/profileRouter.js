@@ -1,34 +1,15 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const multer = require('multer')
-const { host } = require('../shared/host')
-
-const profileRouter = express.Router()
-profileRouter.use(bodyParser.json())
 
 const User = require('../models/user')
 const Doctor = require('../models/doctor')
+
+const { host } = require('../shared/host')
 const authenticate = require('../shared/authenticate')
+const fileUpload = require('../shared/fileUploadConfig')
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let folder = (req.user.type == 1? 'users' : 'doctors')
-        cb(null, __dirname + '/../public/images/' + folder)
-    },
-    filename: (req, file, cb) => {
-        let filename = req.user.userId + file.originalname.substring(file.originalname.lastIndexOf('.'))
-        cb(null, filename)
-    }
-})
-
-const imageFileFilter = (req, file, cb) => {
-    if(!file.originalname.match(/\.(jpg|jpeg|png|PNG)$/)) {
-        return cb(new Error('You can upload only image files!'), false)
-    }
-    cb(null, true)
-}
-
-const upload = multer({ storage: storage, fileFilter: imageFileFilter })
+const profileRouter = express.Router()
+profileRouter.use(bodyParser.json())
 
 profileRouter.route('/details')
 .get(authenticate.verifyUser, (req, res, next) => {
@@ -58,7 +39,7 @@ profileRouter.route('/details')
         .catch((err) => next(err))
 })
 
-profileRouter.post('/imageUpload', authenticate.verifyUser, upload.single('image'), (req, res, next) => {
+profileRouter.post('/imageUpload', authenticate.verifyUser, fileUpload.uploadImage.single('image'), (req, res, next) => {
     if(req.file){
         console.log('File received!')
         let Profile

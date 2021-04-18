@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const User = require('../models/user')
+
 const authenticate = require('../shared/authenticate')
 
 const userRouter = express.Router()
