@@ -25,7 +25,7 @@ accountRouter.post('/login', (req, res, next) => {
               res.status(200).send({resCode: -1, msg: 'Invalid User'})
             else if(await bcrpyt.compare(req.body.password, account.password)){
                const token = authenticate.getToken({ userId: account._id, type: req.body.type })
-               res.status(200).send({resCode: 1, msg: 'Logged in', token: token})
+               res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username})
             }
             else
               res.status(200).send({resCode: 0, msg: 'Invalid Password'})
@@ -38,7 +38,7 @@ accountRouter.post('/login', (req, res, next) => {
                     res.status(200).send({resCode: -1, msg: 'Invalid User'})
                   else if(await bcrpyt.compare(req.body.password, account.password)){
                       const token = authenticate.getToken({ userId: account._id, type: req.body.type })
-                      res.status(200).send({resCode: 1, msg: 'Logged in', token: token})
+                      res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username})
                   }
                   else
                     res.status(200).send({resCode: 0, msg: 'Invalid Password'})

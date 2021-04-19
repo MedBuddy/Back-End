@@ -29,7 +29,7 @@ doctorRouter.get('/unverified', authenticate.verifyUser, authenticate.verifyAdmi
 doctorRouter.post('/license', authenticate.verifyUser, authenticate.verifyDoctor, fileUpload.uploadPdf.single('license'), (req, res, next) => {
     if(req.file){
         console.log('File received!')
-        Doctor.findByIdAndUpdate(req.user.userId, { license: host + '/licenses/' + req.file['filename'] })
+        Doctor.findByIdAndUpdate(req.user.userId, { license: host + fileUpload.getFilePath(req.file.path) })
             .then((profile) => {
                 Doctor.findById(profile._id)
                   .then((profile) => {

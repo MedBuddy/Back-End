@@ -46,9 +46,7 @@ profileRouter.post('/imageUpload', authenticate.verifyUser, fileUpload.uploadIma
         if(req.user.type == 1) Profile = User
         else if(req.user.type == 2) Profile = Doctor
         else return res.sendStatus(403)
-        Profile.findByIdAndUpdate(req.user.userId, { 
-                image: `${host}/images/${(req.user.type == 1? 'users':'doctors')}/${req.file['filename']}` 
-            })
+        Profile.findByIdAndUpdate(req.user.userId, { image: host + fileUpload.getFilePath(req.file.path) })
             .then((profile) => {
                 Profile.findById(profile._id)
                   .then((profile) => {

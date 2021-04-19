@@ -1,10 +1,27 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+const Vote = new Schema({
+    userId: {
+        type: String,
+        required: true
+    }
+},{
+    timestamps: true
+})
+
 const Reply = new Schema({
     content: {
         type: String,
         required: true
+    },
+    upvotes: {
+        type: [Vote],
+        default: []
+    },
+    downvotes: {
+        type: [Vote],
+        default: []
     },
     author: {
         type: String,
@@ -14,7 +31,7 @@ const Reply = new Schema({
     timestamps: true
 })
 
-const Question = new Schema({
+const Query = new Schema({
     title: {
         type: String,
         required: true
@@ -39,4 +56,4 @@ const Question = new Schema({
     timestamps: true
 })
 
-module.exports = mongoose.model('Question', Question)
+module.exports = mongoose.model('Query', Query)
