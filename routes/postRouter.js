@@ -15,5 +15,11 @@ postRouter.route('/')
         }, err => next(err))
         .catch(err => next(err))
 })
+.put((req, res, next) => {
+    res.statusCode(405).send('PUT operation not allowed')
+})
+.delete((req, res, next) => {
+    res.statusCode(405).send('DELETE operation not allowed')
+})
 
 module.exports = postRouter

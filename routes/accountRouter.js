@@ -6,7 +6,7 @@ const User = require('../models/user')
 const Doctor = require('../models/doctor')
 const Admin = require('../models/admin')
 
-const sendEmail = require('../shared/email').sendEmail
+const { sendEmail, getOTPMsg } = require('../shared/email')
 const authenticate = require('../shared/authenticate')
 
 const accountRouter = express.Router()
@@ -76,7 +76,7 @@ accountRouter.post('/signup', (req, res, next) => {
               .then((account) => {
                 User.findById(account._id)
                   .then((account) => {
-                      sendEmail(account.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
+                      sendEmail(account.email, 'MedBuddy Account Activation', getOTPMsg(account.username , otp))
                       res.status(200).send(account)
                   })
               }, (err) => next(err))
@@ -102,7 +102,7 @@ accountRouter.post('/signup', (req, res, next) => {
                       .then((account) => {
                         User.findById(account._id)
                           .then((account) => {
-                              sendEmail(req.body.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
+                              sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
                               res.status(200).send(account)
                           }); 
                       }, (err) => next(err))
@@ -128,7 +128,7 @@ accountRouter.post('/signup', (req, res, next) => {
                    .then((account) => {
                      User.findById(account._id)
                        .then((account) => {
-                          sendEmail(req.body.email, 'MedBuddy Account Activation', 'Your OTP for account activation is ' + otp)
+                          sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
                           res.status(200).send(account)
                         }) 
                         .catch((err) => next(err))
@@ -154,7 +154,7 @@ accountRouter.post('/otp', (req, res, next) => {
           account.otp = null
           account.save()
           .then((account) => {
-            res.status(200).send("User account activated!")
+            res.status(200).send({ msg: "User account activated!", account: account })
           }, (err) => next(err))
           .catch((err) => next(err))
         }
