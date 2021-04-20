@@ -16,7 +16,7 @@ exports.verifyUser = (req, res, next) => {
     }
     jwt.verify(token, secretKey, (err, user) => {
         if(err){
-            err = new Error('Invalid Token!')
+            err = new Error('Invalid/Expired Token!')
             err.status = 403
             return next(err)
         }
@@ -37,6 +37,16 @@ exports.verifyAdmin = (req, res, next) => {
 
 exports.verifyDoctor = (req, res, next) => {
     if(req.user.type == 2)
+        next()
+    else {
+        err = new Error('You are not authorized to perform this operation!');
+        err.status = 403;
+        return next(err);
+    }
+}
+
+exports.verifyDoctorOrAdmin = (req, res, next) => {
+    if(req.user.type != 1)
         next()
     else {
         err = new Error('You are not authorized to perform this operation!');

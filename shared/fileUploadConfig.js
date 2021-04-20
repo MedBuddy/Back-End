@@ -59,3 +59,16 @@ const postStorage = multer.diskStorage({
 const POST_MAX = 10 * 1024 * 1024
 
 exports.uploadPost = multer({ storage: postStorage, limits: { fileSize: POST_MAX } })
+
+exports.deleteFiles = (oldFiles, userId) => {
+    let folder = __dirname + '/../public/posts/' + userId + '/'
+    const files = oldFiles
+    files.forEach(filepath => {
+        let filename = filepath.substring(filepath.lastIndexOf('\\') + 1)
+        fs.rm(folder + filename, { recursive: true }, err => {
+            if(err)
+                return console.error(err)
+            console.log('File Deleted:', filename)
+        })
+    })
+}

@@ -1,26 +1,17 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const Vote = new Schema({
-    userId: {
-        type: String,
-        required: true
-    }
-},{
-    timestamps: true
-})
-
 const Reply = new Schema({
     content: {
         type: String,
         required: true
     },
     upvotes: {
-        type: [Vote],
+        type: [String],
         default: []
     },
     downvotes: {
-        type: [Vote],
+        type: [String],
         default: []
     },
     author: {
