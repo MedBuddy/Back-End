@@ -12,6 +12,7 @@ const doctorRouter = require('./routes/doctorRouter')
 const adminRouter = require('./routes/adminRouter')
 const profileRouter = require('./routes/profileRouter')
 const postRouter = require('./routes/postRouter')
+const queryRouter = require('./routes/queryRouter')
 
 var app = express()
 
@@ -39,6 +40,7 @@ app.use('/doctors', doctorRouter)
 app.use('/admin', adminRouter)
 app.use('/profile', profileRouter)
 app.use('/posts', postRouter)
+app.use('/queries', queryRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

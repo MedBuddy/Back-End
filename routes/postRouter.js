@@ -80,23 +80,30 @@ postRouter.route('/:postId')
 .put(authenticate.verifyUser, authenticate.verifyDoctorOrAdmin, fileUpload.uploadPost.fields(postFields), (req, res, next) => {
     if(req.files){
         console.log('Files Received!')
-        Post.findOne({ _id: req.params['postId'], postedUserId: req.user.userId })
+        Post.findById(req.params['postId'])
             .then((post) => {
-                fileUpload.deleteFiles(post.files, req.user.userId)
-                let files = []
-                for(let i in req.files){
-                    for(let j = 0; j < req.files[i].length; j++){
-                        files.push(host + fileUpload.getFilePath(req.files[i][j].path))
-                    }
+                if(post.postedUserId != req.user.userId){
+                    err = new Error(`You are not allowed to edit this post!`)
+                    err.status = 404
+                    return next(err)
                 }
-                post.title = req.body.title
-                post.content = req.body.content
-                post.files = files
-                post.save()
-                    .then((post) => {
-                        res.status(200).send(post)
-                    }, err => next(err))
-                    .catch(err => next(err))
+                else{
+                    fileUpload.deleteFiles(post.files, req.user.userId, 'posts')
+                    let files = []
+                    for(let i in req.files){
+                        for(let j = 0; j < req.files[i].length; j++){
+                            files.push(host + fileUpload.getFilePath(req.files[i][j].path))
+                        }
+                    }
+                    post.title = req.body.title
+                    post.content = req.body.content
+                    post.files = files
+                    post.save()
+                        .then((post) => {
+                            res.status(200).send(post)
+                        }, err => next(err))
+                        .catch(err => next(err))
+                }
             }, err => next(err))
             .catch(err => next(err))
     }
@@ -106,14 +113,21 @@ postRouter.route('/:postId')
     }
 })
 .delete(authenticate.verifyUser, authenticate.verifyDoctorOrAdmin, (req, res, next) => {
-    Post.findOne({ _id: req.params['postId'], postedUserId: req.user.userId })
+    Post.findById(req.params['postId'])
         .then((post) => {
-            fileUpload.deleteFiles(post.files, req.user.userId)
-            post.remove()
-                .then((resp) => {
-                    res.status(200).send(resp)
-                }, err => next(err))
-                .catch(err => next(err))
+            if(post.postedUserId != req.user.userId){
+                err = new Error(`You are not allowed to delete this post!`)
+                err.status = 404
+                return next(err)
+            }
+            else{
+                fileUpload.deleteFiles(post.files, req.user.userId, 'posts')
+                post.remove()
+                    .then((resp) => {
+                        res.status(200).send(resp)
+                    }, err => next(err))
+                    .catch(err => next(err))
+            }
         }, err => next(err))
         .catch(err => next(err))
 })
@@ -214,7 +228,7 @@ postRouter.route('/:postId/comments/:commentId')
                         .catch(err => next(err))
                 }
                 else{
-                    err = new Error(`You are not allowed to delete this comment`)
+                    err = new Error(`You are not allowed to delete this comment!`)
                     err.status = 404
                     return next(err)
                 }

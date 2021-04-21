@@ -5,6 +5,19 @@ exports.getFilePath = (path) => {
     return path.substring(path.indexOf('public') + 6)
 }
 
+exports.deleteFiles = (oldFiles, userId, dest) => {
+    let folder = __dirname + '/../public/' + dest + '/' + userId + '/'
+    const files = oldFiles
+    files.forEach(filepath => {
+        let filename = filepath.substring(filepath.lastIndexOf('\\') + 1)
+        fs.rm(folder + filename, { recursive: true }, err => {
+            if(err)
+                return console.error(err)
+            console.log('File Deleted:', filename)
+        })
+    })
+}
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let folder
@@ -42,13 +55,13 @@ exports.uploadPdf = multer({ storage: storage, fileFilter: pdfFileFilter, limits
 
 const postStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        fs.mkdir(__dirname + '/../public/posts/' + req.user.userId, { recursive: true }, (err) => {
+        let folder = __dirname + '/../public/posts/' + req.user.userId
+        fs.mkdir(folder, { recursive: true }, (err) => {
             if(err)
                 return console.error(err)
             //console.log('Folder Created!')
         })
-        let folder = 'posts/' + req.user.userId
-        cb(null, __dirname + '/../public/' + folder)
+        cb(null, folder)
     },
     filename: (req, file, cb) => {
         let filename = Date.now() + '-' + file.originalname
@@ -60,15 +73,22 @@ const POST_MAX = 10 * 1024 * 1024
 
 exports.uploadPost = multer({ storage: postStorage, limits: { fileSize: POST_MAX } })
 
-exports.deleteFiles = (oldFiles, userId) => {
-    let folder = __dirname + '/../public/posts/' + userId + '/'
-    const files = oldFiles
-    files.forEach(filepath => {
-        let filename = filepath.substring(filepath.lastIndexOf('\\') + 1)
-        fs.rm(folder + filename, { recursive: true }, err => {
+const queryStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        let folder = __dirname + '/../public/queryFiles/' + req.user.userId
+        fs.mkdir(folder, { recursive: true }, (err) => {
             if(err)
                 return console.error(err)
-            console.log('File Deleted:', filename)
+            //console.log('Folder Created!')
         })
-    })
-}
+        cb(null, folder)
+    },
+    filename: (req, file, cb) => {
+        let filename = Date.now() + '-' + file.originalname
+        cb(null, filename)
+    }
+})
+
+const QUERY_MAX = 10 * 1024 * 1024
+
+exports.uploadQuery = multer({ storage: queryStorage, limits: { fileSize: QUERY_MAX } })
