@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
         cb(null, __dirname + '/../public/' + folder)
     },
     filename: (req, file, cb) => {
-        let filename = req.user.userId + file.originalname.substring(file.originalname.lastIndexOf('.'))
+        let filename = req.body.userId + file.originalname.substring(file.originalname.lastIndexOf('.'))
         cb(null, filename)
     }
 })

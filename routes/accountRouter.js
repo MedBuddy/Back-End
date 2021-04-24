@@ -61,7 +61,7 @@ accountRouter.post('/signup', (req, res, next) => {
       .then(async (account) => {
         if(account){
           if(account.activated)
-            res.status(200).send("Username already exists!")
+            res.status(200).send({resCode: -1, msg: "Username already exists!"})
           else {
             const salt = await bcrpyt.genSalt()
             const hashedPassword = await bcrpyt.hash(req.body.password, salt)
@@ -74,10 +74,10 @@ accountRouter.post('/signup', (req, res, next) => {
             account.email = req.body.email
             account.save()
               .then((account) => {
-                User.findById(account._id)
+                Account.findById(account._id)
                   .then((account) => {
                       sendEmail(account.email, 'MedBuddy Account Activation', getOTPMsg(account.username , otp))
-                      res.status(200).send(account)
+                      res.status(200).send({resCode: 1, msg: account._id})
                   })
               }, (err) => next(err))
           }
@@ -87,7 +87,7 @@ accountRouter.post('/signup', (req, res, next) => {
             .then(async (account) => {
                 if(account){
                   if(account.activated)
-                    res.status(200).send("Email already registered!")
+                    res.status(200).send({resCode: 0,msg: "Email already registered!"})
                   else {
                     const salt = await bcrpyt.genSalt()
                     const hashedPassword = await bcrpyt.hash(req.body.password, salt)
@@ -100,10 +100,10 @@ accountRouter.post('/signup', (req, res, next) => {
                     account.password = hashedPassword
                     account.save()
                       .then((account) => {
-                        User.findById(account._id)
+                        Account.findById(account._id)
                           .then((account) => {
                               sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
-                              res.status(200).send(account)
+                              res.status(200).send({resCode: 1, msg: account._id})
                           }); 
                       }, (err) => next(err))
                   }
@@ -126,10 +126,10 @@ accountRouter.post('/signup', (req, res, next) => {
                     account.verified = false
                   Account.create(account)
                    .then((account) => {
-                     User.findById(account._id)
+                     Account.findById(account._id)
                        .then((account) => {
                           sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
-                          res.status(200).send(account)
+                          res.status(200).send({resCode: 1, msg: account._id})
                         }) 
                         .catch((err) => next(err))
                     }, (err) => next(err))
@@ -154,12 +154,12 @@ accountRouter.post('/otp', (req, res, next) => {
           account.otp = null
           account.save()
           .then((account) => {
-            res.status(200).send({ msg: "User account activated!", account: account })
+            res.status(200).send({ resCode: 1, msg: "User account activated!" })
           }, (err) => next(err))
           .catch((err) => next(err))
         }
         else
-          res.status(200).send("Invalid OTP")
+          res.status(200).send({resCode: 0, msg: "Invalid OTP"})
       }, (err) => next(err))
       .catch((err) => next(err))
 })
