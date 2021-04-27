@@ -1,6 +1,4 @@
 node_modules
 request.rest
-mongo_connect.txt
-structures.txt
 
 shared/credentials.js

@@ -75,7 +75,7 @@ exports.uploadPost = multer({ storage: postStorage, limits: { fileSize: POST_MAX
 
 const queryStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        let folder = __dirname + '/../public/queryFiles/' + req.user.userId
+        let folder = __dirname + '/../public/queries/' + req.user.userId
         fs.mkdir(folder, { recursive: true }, (err) => {
             if(err)
                 return console.error(err)

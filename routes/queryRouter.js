@@ -80,7 +80,7 @@ queryRouter.route('/:queryId')
                     return next(err)
                 }
                 else{
-                    fileUpload.deleteFiles(query.files, req.user.userId, 'queryFiles')
+                    fileUpload.deleteFiles(query.files, req.user.userId, 'queries')
                     let files = []
                     for(let i in req.files){
                         for(let j = 0; j < req.files[i].length; j++){
@@ -113,7 +113,7 @@ queryRouter.route('/:queryId')
                 return next(err)
             }
             else{
-                fileUpload.deleteFiles(query.files, req.user.userId, 'queryFiles')
+                fileUpload.deleteFiles(query.files, req.user.userId, 'queries')
                 query.remove()
                     .then((resp) => {
                         res.status(200).send(resp)
