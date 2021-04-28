@@ -54,3 +54,13 @@ exports.verifyDoctorOrAdmin = (req, res, next) => {
         return next(err);
     }
 }
+
+exports.verifyNormalUser = (req, res, next) => {
+    if(req.user.type = 1)
+        next()
+    else {
+        err = new Error('You are not authorized to perform this operation!');
+        err.status = 403;
+        return next(err);
+    }
+}
