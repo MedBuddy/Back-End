@@ -25,7 +25,7 @@ queryRouter.route('/')
         }, err => next(err))
         .catch(err => next(err))
 })
-.post(authenticate.verifyUser, authenticate.verifyDoctorOrAdmin, fileUpload.uploadQuery.fields(queryFields), (req, res, next) => {
+.post(authenticate.verifyUser, fileUpload.uploadQuery.fields(queryFields), (req, res, next) => {
     if(req.files){
         console.log('Files received!')
         let files = []
@@ -69,7 +69,7 @@ queryRouter.route('/:queryId')
 .post((req, res, next) => {
     res.status(405).send('POST operation not allowed')
 })
-.put(authenticate.verifyUser, authenticate.verifyDoctorOrAdmin, fileUpload.uploadQuery.fields(queryFields), (req, res, next) => {
+.put(authenticate.verifyUser, fileUpload.uploadQuery.fields(queryFields), (req, res, next) => {
     if(req.files){
         console.log('Files Received!')
         Query.findById(req.params['queryId'])
@@ -104,7 +104,7 @@ queryRouter.route('/:queryId')
         res.status(200).send('Nothing')
     }
 })
-.delete(authenticate.verifyUser, authenticate.verifyDoctorOrAdmin, (req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Query.findById(req.params['queryId'])
         .then((query) => {
             if(query.askedUserId != req.user.userId){
