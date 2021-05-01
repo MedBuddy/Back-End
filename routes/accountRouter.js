@@ -5,6 +5,7 @@ const bcrpyt = require('bcryptjs')
 const User = require('../models/user')
 const Doctor = require('../models/doctor')
 const Admin = require('../models/admin')
+const Image = require('../models/image')
 
 const { sendEmail, getOTPMsg } = require('../shared/email')
 const authenticate = require('../shared/authenticate')
@@ -24,7 +25,7 @@ accountRouter.post('/login', (req, res, next) => {
             if(!account.activated)
               res.status(200).send({resCode: -1, msg: 'Invalid User'})
             else if(await bcrpyt.compare(req.body.password, account.password)){
-               const token = authenticate.getToken({ userId: account._id, type: req.body.type })
+               const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image })
                res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username})
             }
             else
@@ -37,7 +38,7 @@ accountRouter.post('/login', (req, res, next) => {
                   if(!account.activated)
                     res.status(200).send({resCode: -1, msg: 'Invalid User'})
                   else if(await bcrpyt.compare(req.body.password, account.password)){
-                      const token = authenticate.getToken({ userId: account._id, type: req.body.type })
+                      const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image })
                       res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username})
                   }
                   else
@@ -115,25 +116,31 @@ accountRouter.post('/signup', (req, res, next) => {
                   for(var i=1;i<=6;i++) 
                     otp += Math.floor(Math.random() * 10)
                   const hashedOtp = await bcrpyt.hash(otp, 10)
-                  account = { 
-                      username: req.body.username,
-                      password: hashedPassword,
-                      email: req.body.email,
-                      otp: hashedOtp,
-                      activated: false
-                  }
-                  if(req.body.type == 2)
-                    account.verified = false
-                  Account.create(account)
-                   .then((account) => {
-                     Account.findById(account._id)
-                       .then((account) => {
-                          sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
-                          res.status(200).send({resCode: 1, msg: account._id})
-                        }) 
-                        .catch((err) => next(err))
-                    }, (err) => next(err))
-                   .catch((err) => next(err))
+                  Image.create({})
+                      .then((image) => {
+                          Image.findById(image._id)
+                            .then((image) => {
+                                  account = { 
+                                    username: req.body.username,
+                                    password: hashedPassword,
+                                    email: req.body.email,
+                                    otp: hashedOtp,
+                                    image: image._id
+                                  }
+                                  Account.create(account)
+                                  .then((account) => {
+                                    Account.findById(account._id)
+                                    .then((account) => {
+                                      sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
+                                      res.status(200).send({resCode: 1, msg: account._id})
+                                      }) 
+                                      .catch((err) => next(err))
+                                    }, (err) => next(err))
+                                  .catch((err) => next(err))
+                            }) 
+                            .catch((err) => next(err))
+                      }, (err) => next(err))
+                      .catch((err) => next(err))
                 }
             }, (err) => next(err))
           .catch((err) => next(err))

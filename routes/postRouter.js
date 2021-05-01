@@ -28,6 +28,8 @@ postRouter.use(bodyParser.json())
 postRouter.route('/')
 .get((req, res, next) => {
     Post.find({})
+        .populate('userIcon')
+        .populate('comments.userIcon')
         .then((posts) => {
             res.status(200).send(posts)
         }, err => next(err))
@@ -46,6 +48,8 @@ postRouter.route('/')
             title: req.body.title,
             content: req.body.content,
             postedUserId: req.user.userId,
+            postedUserName: req.user.username,
+            userIcon: req.user.icon,
             files: files
         }
         Post.create(post)
@@ -69,6 +73,8 @@ postRouter.route('/')
 postRouter.route('/:postId')
 .get((req, res, next) => {
     Post.findById(req.params['postId'])
+        .populate('userIcon')
+        .populate('comments.userIcon')
         .then((post) => {
             res.status(200).send(post)
         }, err => next(err))
@@ -135,6 +141,7 @@ postRouter.route('/:postId')
 postRouter.route('/:postId/comments')
 .get((req, res, next) => {
     Post.findById(req.params['postId'])
+        .populate('comments.userIcon')
         .then((post) => {
             res.status(200).send(post.comments)
         }, err => next(err))
@@ -145,7 +152,9 @@ postRouter.route('/:postId/comments')
         .then((post) => {
             const comment = {
                 content: req.body.content,
-                author: req.user.userId
+                author: req.user.username,
+                userId: req.user.userId,
+                userIcon: req.user.icon
             }
             post.comments.push(comment)
             post.save()
@@ -175,6 +184,7 @@ postRouter.route('/:postId/comments')
 postRouter.route('/:postId/comments/:commentId')
 .get((req, res, next) => {
     Post.findById(req.params['postId'])
+        .populate('comments.userIcon')
         .then((post) => {
             if(post.comments.id(req.params['commentId']) != null)
                 res.status(200).send(post.comments.id(req.params['commentId']))
@@ -193,7 +203,7 @@ postRouter.route('/:postId/comments/:commentId')
     Post.findById(req.params['postId'])
         .then((post) => {
             if(post.comments.id(req.params['commentId']) != null){
-                if(post.comments.id(req.params['commentId']).author == req.user.userId){
+                if(post.comments.id(req.params['commentId']).userId == req.user.userId){
                     post.comments.id(req.params['commentId']).content = req.body.content
                     post.save()
                         .then(post => {
@@ -219,7 +229,7 @@ postRouter.route('/:postId/comments/:commentId')
     Post.findById(req.params['postId'])
         .then((post) => {
             if(post.comments.id(req.params['commentId']) != null){
-                if(post.comments.id(req.params['commentId']).author == req.user.userId){
+                if(post.comments.id(req.params['commentId']).userId == req.user.userId){
                     post.comments.id(req.params['commentId']).remove()
                     post.save()
                         .then(post => {

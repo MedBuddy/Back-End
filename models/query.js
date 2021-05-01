@@ -17,6 +17,14 @@ const Reply = new Schema({
     author: {
         type: String,
         required: true
+    },
+    userId: {
+        type: String,
+        required: true
+    },
+    userIcon: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image'
     }
 },{
     timestamps: true
@@ -34,6 +42,14 @@ const Query = new Schema({
     askedUserId: {
         type: String,
         required: true
+    },
+    askedUserName: {
+        type: String,
+        required: true
+    },
+    userIcon: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image'
     },
     files: {
         type: [String],

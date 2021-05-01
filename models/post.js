@@ -9,6 +9,14 @@ const Comment = new Schema({
     author: {
         type: String,
         required: true
+    },
+    userId: {
+        type: String,
+        required: true
+    },
+    userIcon: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image'
     }
 },{
     timestamps: true
@@ -26,6 +34,14 @@ const Post = new Schema({
     postedUserId: {
         type: String,
         required: true
+    },
+    postedUserName: {
+        type: String,
+        required: true
+    },
+    userIcon: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image'
     },
     files: {
         type: [String],

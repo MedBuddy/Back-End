@@ -19,7 +19,8 @@ const User = new Schema({
         type: String
     },
     activated: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     firstname: {
         type: String,
@@ -34,8 +35,8 @@ const User = new Schema({
         default: 1
     },
     image: {
-        type: String,
-        default: host + '/images/user-default.jpg'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image'
     },
     dob: {
         type: Date,

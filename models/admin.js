@@ -16,8 +16,8 @@ const Admin = new Schema({
         required: true
     },
     image: {
-        type: String,
-        default: host + '/images/user-default.jpg'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image'
     },
     firstname: {
         type: String,

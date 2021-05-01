@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
         cb(null, __dirname + '/../public/' + folder)
     },
     filename: (req, file, cb) => {
-        let filename = req.body.userId + file.originalname.substring(file.originalname.lastIndexOf('.'))
+        let filename = req.user.userId + file.originalname.substring(file.originalname.lastIndexOf('.'))
         cb(null, filename)
     }
 })
@@ -47,8 +47,8 @@ const pdfFileFilter = (req, file, cb) => {
     cb(null, true)
 }
 
-const IMAGE_MAX = 500 * 1024
-const PDF_MAX = 1* 1024 * 1024
+const IMAGE_MAX = 1 * 1024 * 1024
+const PDF_MAX = 2 * 1024 * 1024
 
 exports.uploadImage = multer({ storage: storage, fileFilter: imageFileFilter, limits: { fileSize: IMAGE_MAX } })
 exports.uploadPdf = multer({ storage: storage, fileFilter: pdfFileFilter, limits: { fileSize: PDF_MAX } })

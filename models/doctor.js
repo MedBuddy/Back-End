@@ -19,10 +19,12 @@ const Doctor = new Schema({
         type: String
     },
     activated: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     verified: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     license: {
         type: String,
@@ -33,8 +35,8 @@ const Doctor = new Schema({
         default: 2
     },
     image: {
-        type: String,
-        default: host + '/images/user-default.jpg'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image'
     },
     firstname: {
         type: String,

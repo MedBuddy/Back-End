@@ -7,12 +7,14 @@ adminRouter.use(bodyParser.json())
 
 const Admin = require('../models/admin')
 const Doctor = require('../models/doctor')
+const Image = require('../models/image')
 
 const sendEmail = require('../shared/email').sendEmail
 const authenticate = require('../shared/authenticate')
 
 adminRouter.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Admin.find({})
+      .populate('image')
       .then((admins) => {
           res.status(200).send(admins)
       }, (err) => next(err))
@@ -34,20 +36,28 @@ adminRouter.post('/signup', authenticate.verifyUser, authenticate.verifyAdmin, (
                 else{
                   const salt = await bcrpyt.genSalt()
                   const hashedPassword = await bcrpyt.hash(req.body.password, salt)
-                  admin = { 
-                      username: req.body.username,
-                      password: hashedPassword,
-                      email: req.body.email
-                  }
-                  Admin.create(admin)
-                   .then((admin) => {
-                     Admin.findById(admin._id)
-                       .then((admin) => {
-                          res.status(200).send(admin)
-                        }) 
-                        .catch((err) => next(err))
-                    }, (err) => next(err))
-                   .catch((err) => next(err))
+                  Image.create({})
+                    .then(image => {
+                        Image.findById(image._id)
+                          .then(image => {
+                              admin = { 
+                                  username: req.body.username,
+                                  password: hashedPassword,
+                                  email: req.body.email,
+                                  image: image._id
+                              }
+                              Admin.create(admin)
+                                .then((admin) => {
+                                  Admin.findById(admin._id)
+                                    .then((admin) => {
+                                      res.status(200).send(admin)
+                                    }) 
+                                    .catch((err) => next(err))
+                                }, (err) => next(err))
+                                .catch((err) => next(err))
+                          }, err => next(err))
+                          .catch(err => next(err))
+                    })
                 }
             }, (err) => next(err))
           .catch((err) => next(err))

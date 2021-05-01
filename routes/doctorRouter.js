@@ -13,6 +13,7 @@ doctorRouter.use(bodyParser.json())
 
 doctorRouter.get('/', authenticate.verifyUser, (req, res, next) => {
     Doctor.find({})
+      .populate('image')
       .then((doctors) => {
           res.status(200).send(doctors)
       }, (err) => next(err))
@@ -21,6 +22,7 @@ doctorRouter.get('/', authenticate.verifyUser, (req, res, next) => {
 
 doctorRouter.get('/unverified', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Doctor.find({ verified: false })
+        .populate('image')
         .then((doctors) => {
             res.status(200).send(doctors)
         }, (err) => next(err))
@@ -48,10 +50,11 @@ doctorRouter.post('/license', fileUpload.uploadPdf.single('license'), (req, res,
 
 doctorRouter.get('/:doctorId', authenticate.verifyUser, (req, res, next) => {
     Doctor.findById(req.params['doctorId'])
-      .then((doctor) => {
-          res.status(200).send(doctor)
-      }, (err) => next(err))
-      .catch((err) => next(err))
+        .populate('image')
+        .then((doctor) => {
+            res.status(200).send(doctor)
+        }, (err) => next(err))
+        .catch((err) => next(err))
 })
 
 doctorRouter.route('/:doctorId/reviews')

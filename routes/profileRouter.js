@@ -3,6 +3,8 @@ const bodyParser = require('body-parser')
 
 const User = require('../models/user')
 const Doctor = require('../models/doctor')
+const Admin = require('../models/admin')
+const Image = require('../models/image')
 
 const { host } = require('../shared/host')
 const authenticate = require('../shared/authenticate')
@@ -45,14 +47,17 @@ profileRouter.post('/imageUpload', authenticate.verifyUser, fileUpload.uploadIma
         let Profile
         if(req.user.type == 1) Profile = User
         else if(req.user.type == 2) Profile = Doctor
+        else if(req.user.type == 3) Profile = Admin
         else return res.sendStatus(403)
-        Profile.findByIdAndUpdate(req.user.userId, { image: host + fileUpload.getFilePath(req.file.path) })
+        Profile.findById(req.user.userId)
             .then((profile) => {
-                Profile.findById(profile._id)
-                  .then((profile) => {
-                      res.status(200).send(profile)
-                  }, (err) => next(err))
-                  .catch((err) => next(err))
+                Image.findByIdAndUpdate(profile.image, { url: host + fileUpload.getFilePath(req.file.path) })
+                    .then(image => {
+                        Image.findById(image._id)
+                            .then(image => res.status(200).send(image),
+                                  err => next(err))
+                            .catch(err => next(err))
+                    })
             }, (err) => next(err))
             .catch((err) => next(err))
     }

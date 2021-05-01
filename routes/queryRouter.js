@@ -20,6 +20,8 @@ queryRouter.use(bodyParser.json())
 queryRouter.route('/')
 .get((req, res, next) => {
     Query.find({})
+        .populate('userIcon')
+        .populate('replies.userIcon')
         .then((queries) => {
             res.status(200).send(queries)
         }, err => next(err))
@@ -38,6 +40,8 @@ queryRouter.route('/')
             title: req.body.title,
             content: req.body.content,
             askedUserId: req.user.userId,
+            askedUserName: req.user.username,
+            userIcon: req.user.icon,
             files: files
         }
         Query.create(query)
@@ -61,6 +65,8 @@ queryRouter.route('/')
 queryRouter.route('/:queryId')
 .get((req, res, next) => {
     Query.findById(req.params['queryId'])
+        .populate('userIcon')
+        .populate('replies.userIcon')
         .then((query) => {
             res.status(200).send(query)
         }, err => next(err))
@@ -127,6 +133,7 @@ queryRouter.route('/:queryId')
 queryRouter.route('/:queryId/replies')
 .get((req, res, next) => {
     Query.findById(req.params['queryId'])
+        .populate('replies.userIcon')
         .then((query) => {
             res.status(200).send(query.replies)
         }, err => next(err))
@@ -137,7 +144,9 @@ queryRouter.route('/:queryId/replies')
         .then((query) => {
             const reply = {
                 content: req.body.content,
-                author: req.user.userId
+                author: req.user.username,
+                userId: req.user.userId,
+                userIcon: req.user.icon
             }
             query.replies.push(reply)
             query.save()
@@ -167,6 +176,7 @@ queryRouter.route('/:queryId/replies')
 queryRouter.route('/:queryId/replies/:replyId')
 .get((req, res, next) => {
     Query.findById(req.params['queryId'])
+        .populate('replies.userIcon')
         .then((query) => {
             if(query.replies.id(req.params['replyId']) != null)
                 res.status(200).send(query.replies.id(req.params['replyId']))
@@ -185,7 +195,7 @@ queryRouter.route('/:queryId/replies/:replyId')
     Query.findById(req.params['queryId'])
         .then((query) => {
             if(query.replies.id(req.params['replyId']) != null){
-                if(query.replies.id(req.params['replyId']).author == req.user.userId){
+                if(query.replies.id(req.params['replyId']).userId == req.user.userId){
                     query.replies.id(req.params['replyId']).content = req.body.content
                     query.save()
                         .then(query => {
@@ -211,7 +221,7 @@ queryRouter.route('/:queryId/replies/:replyId')
     Query.findById(req.params['queryId'])
         .then((query) => {
             if(query.replies.id(req.params['replyId']) != null){
-                if(query.replies.id(req.params['replyId']).author == req.user.userId){
+                if(query.replies.id(req.params['replyId']).userId == req.user.userId){
                     query.replies.id(req.params['replyId']).remove()
                     query.save()
                         .then(query => {

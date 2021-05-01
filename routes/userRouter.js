@@ -10,6 +10,7 @@ userRouter.use(bodyParser.json())
 
 userRouter.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     User.find({})
+      .populate('image')
       .then((users) => {
           res.status(200).send(users)
       }, (err) => next(err))
