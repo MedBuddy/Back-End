@@ -6,6 +6,10 @@ const Image = new Schema({
     url: {
         type: String,
         default: host + '/images/user-default.jpg'
+    },
+    username: {
+        type: String,
+        required: true
     }
 },{
     timestamps: true

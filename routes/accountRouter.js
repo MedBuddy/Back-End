@@ -118,16 +118,16 @@ accountRouter.post('/signup', (req, res, next) => {
                   for(var i=1;i<=6;i++) 
                     otp += Math.floor(Math.random() * 10)
                   const hashedOtp = await bcrpyt.hash(otp, 10)
-                  Image.create({})
+                  Image.create({ username: req.body.username })
                       .then((image) => {
                           Image.findById(image._id)
                             .then((image) => {
                                   account = { 
-                                    username: req.body.username,
-                                    password: hashedPassword,
-                                    email: req.body.email,
-                                    otp: hashedOtp,
-                                    image: image._id
+                                      username: req.body.username,
+                                      password: hashedPassword,
+                                      email: req.body.email,
+                                      otp: hashedOtp,
+                                      image: image._id
                                   }
                                   Account.create(account)
                                   .then((account) => {

@@ -62,6 +62,16 @@ queryRouter.route('/')
     res.status(405).send('DELETE operation not allowed')
 })
 
+queryRouter.get('/myqueries', authenticate.verifyUser, (req, res, next) => {
+    Query.find({ askedUserId: req.user.userId })
+        .populate('userIcon')
+        .populate('replies.userIcon')
+        .then(queries => {
+            res.status(200).send(queries)
+        }, err => next(err))
+        .catch(err => next(err))
+})
+
 queryRouter.route('/:queryId')
 .get((req, res, next) => {
     Query.findById(req.params['queryId'])

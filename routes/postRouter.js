@@ -70,6 +70,16 @@ postRouter.route('/')
     res.status(405).send('DELETE operation not allowed')
 })
 
+postRouter.get('/myposts', authenticate.verifyUser, authenticate.verifyDoctorOrAdmin, (req, res, next) => {
+    Post.find({ postedUserId: req.user.userId })
+        .populate('userIcon')
+        .populate('comments.userIcon')
+        .then(posts => {
+            res.status(200).send(posts)
+        }, err => next(err))
+        .catch(err => next(err))
+})
+
 postRouter.route('/:postId')
 .get((req, res, next) => {
     Post.findById(req.params['postId'])
