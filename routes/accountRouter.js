@@ -20,26 +20,28 @@ accountRouter.post('/login', (req, res, next) => {
     else if(req.body.type == 3) Account = Admin
     else return res.sendStatus(403)
     Account.findOne({ username: req.body.userId })
+      .populate('image')
       .then(async (account) => {
           if(account){
             if(!account.activated)
               res.status(200).send({resCode: -1, msg: 'Invalid User'})
             else if(await bcrpyt.compare(req.body.password, account.password)){
-               const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image })
-               res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username})
+               const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image._id })
+               res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username, userIcon: account.image.url})
             }
             else
               res.status(200).send({resCode: 0, msg: 'Invalid Password'})
           }
           else{
             Account.findOne({ email: req.body.userId })
+              .populate('image')
               .then(async (account) => {
                 if(account){
                   if(!account.activated)
                     res.status(200).send({resCode: -1, msg: 'Invalid User'})
                   else if(await bcrpyt.compare(req.body.password, account.password)){
-                      const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image })
-                      res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username})
+                      const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image._id })
+                      res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username, userIcon: account.image.url})
                   }
                   else
                     res.status(200).send({resCode: 0, msg: 'Invalid Password'})
