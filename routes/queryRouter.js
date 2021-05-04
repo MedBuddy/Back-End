@@ -285,21 +285,24 @@ queryRouter.route('/:queryId/replies/:replyId/votes')
                 upvoteIndex = reply.upvotes.indexOf(req.user.userId)
                 downvoteIndex = reply.downvotes.indexOf(req.user.userId)
                 if(upvoteIndex == -1 && downvoteIndex == -1){
-                    if(req.body.voteType === 'up')
+                    if(req.body.voteType === 'up'){
                         reply.upvotes.push(req.user.userId)
-                    else
+                        query.replies.id(req.params['replyId']).upvotes = reply.upvotes
+                    }
+                    else{
                         reply.downvotes.push(req.user.userId)
-                    query.replies.id(req.params['replyId']).upvotes = reply.upvotes
-                    query.replies.id(req.params['replyId']).downvotes = reply.downvotes
+                        query.replies.id(req.params['replyId']).downvotes = reply.downvotes
+                    }
                     query.save()
                         .then(query => {
-                            res.status(200).send(query)
+                            let vote = req.body.voteType[0].toUpperCase()+req.body.voteType.substring(1)
+                            res.status(200).send({query: query, msg: `${vote}voted successfully!`})
                         }, err => next(err))
                         .catch(err => next(err))
                 }
                 else if(upvoteIndex != -1){
                     if(req.body.voteType === 'up')
-                        res.status(200).send('Already upvoted')
+                        res.status(200).send({query: query, msg: 'Already Upvoted!'})
                     else{
                         reply.upvotes.splice(upvoteIndex, 1)
                         reply.downvotes.push(req.user.userId)
@@ -307,14 +310,14 @@ queryRouter.route('/:queryId/replies/:replyId/votes')
                         query.replies.id(req.params['replyId']).downvotes = reply.downvotes
                         query.save()
                             .then(query => {
-                                res.status(200).send(query)
+                                res.status(200).send({query: query, msg: 'Downvoted successfully!'})
                             }, err => next(err))
                             .catch(err => next(err))
                     }
                 }
                 else{
                     if(req.body.voteType === 'down')
-                        res.status(200).send('Already downvoted')
+                        res.status(200).send({query: query, msg: 'Already Downvoted!'})
                     else{
                         reply.downvotes.splice(downvoteIndex, 1)
                         reply.upvotes.push(req.user.userId)
@@ -322,7 +325,7 @@ queryRouter.route('/:queryId/replies/:replyId/votes')
                         query.replies.id(req.params['replyId']).downvotes = reply.downvotes
                         query.save()
                             .then(query => {
-                                res.status(200).send(query)
+                                res.status(200).send({query: query, msg: 'Upvoted successfully!'})
                             }, err => next(err))
                             .catch(err => next(err))
                     }
