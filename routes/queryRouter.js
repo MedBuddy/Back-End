@@ -285,7 +285,7 @@ queryRouter.route('/:queryId/replies/:replyId/votes')
                 upvoteIndex = reply.upvotes.indexOf(req.user.userId)
                 downvoteIndex = reply.downvotes.indexOf(req.user.userId)
                 if(upvoteIndex == -1 && downvoteIndex == -1){
-                    if(req.body.type === 'up')
+                    if(req.body.voteType === 'up')
                         reply.upvotes.push(req.user.userId)
                     else
                         reply.downvotes.push(req.user.userId)
