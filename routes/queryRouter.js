@@ -161,7 +161,13 @@ queryRouter.route('/:queryId/replies')
             query.replies.push(reply)
             query.save()
                 .then(query => {
-                    res.status(200).send(query)
+                    Query.findById(query._id)
+                        .populate('userIcon')
+                        .populate('replies.userIcon')
+                        .then(query => {
+                            res.status(200).send({query: query, msg: 'Reply Added'})
+                        }, err => next(err))
+                        .catch(err => next(err))
                 }, err => next(err))
                 .catch(err => next(err))
         }, err => next(err))
@@ -176,7 +182,13 @@ queryRouter.route('/:queryId/replies')
             query.replies = []
             query.save()
                 .then(query => {
-                    res.status(200).send(query)
+                    Query.findById(query._id)
+                        .populate('userIcon')
+                        .populate('replies.userIcon')
+                        .then(query => {
+                            res.status(200).send({query: query, msg: 'Replies Deleted'})
+                        }, err => next(err))
+                        .catch(err => next(err))
                 }, err => next(err))
                 .catch(err => next(err))
         }, err => next(err))
@@ -209,14 +221,18 @@ queryRouter.route('/:queryId/replies/:replyId')
                     query.replies.id(req.params['replyId']).content = req.body.content
                     query.save()
                         .then(query => {
-                            res.status(200).send(query)
+                            Query.findById(query._id)
+                                .populate('userIcon')
+                                .populate('replies.userIcon')
+                                .then(query => {
+                                    res.status(200).send({query: query, msg: 'Reply Edited'})
+                                }, err => next(err))
+                                .catch(err => next(err))
                         }, err => next(err))
                         .catch(err => next(err))
                 }
                 else{
-                    err = new Error(`You are not allowed to edit this reply!`)
-                    err.status = 404
-                    return next(err)
+                    res.status(403).send('You are not allowed to edit this reply')
                 }
             }
             else{
@@ -235,14 +251,18 @@ queryRouter.route('/:queryId/replies/:replyId')
                     query.replies.id(req.params['replyId']).remove()
                     query.save()
                         .then(query => {
-                            res.status(200).send(query)
+                            Query.findById(query._id)
+                                .populate('userIcon')
+                                .populate('replies.userIcon')
+                                .then(query => {
+                                    res.status(200).send({query: query, msg: 'Reply Deleted'})
+                                }, err => next(err))
+                                .catch(err => next(err))
                         }, err => next(err))
                         .catch(err => next(err))
                 }
                 else{
-                    err = new Error(`You are not allowed to delete this reply!`)
-                    err.status = 404
-                    return next(err)
+                    res.status(403).send('You are not allowed to delete this reply')
                 }
             }
             else{
@@ -279,6 +299,8 @@ queryRouter.route('/:queryId/replies/:replyId/votes')
 })
 .post(authenticate.verifyUser, (req, res, next) => {
     Query.findById(req.params['queryId'])
+        .populate('userIcon')
+        .populate('replies.userIcon')
         .then((query) => {
             if(query.replies.id(req.params['replyId']) != null){
                 let reply = query.replies.id(req.params['replyId'])
@@ -343,48 +365,7 @@ queryRouter.route('/:queryId/replies/:replyId/votes')
     res.status(405).send('PUT operation not allowed')
 })
 .delete(authenticate.verifyUser, (req, res, next) => {
-    Query.findById(req.params['queryId'])
-        .then((query) => {
-            if(query.replies.id(req.params['replyId']) != null){
-                let reply = query.replies.id(req.params['replyId'])
-                upvoteIndex = reply.upvotes.indexOf(req.user.userId)
-                downvoteIndex = reply.downvotes.indexOf(req.user.userId)
-                if(upvoteIndex == -1 && downvoteIndex == -1)
-                    res.status(200).send('Not ' + req.body.voteType + 'voted')
-                else if(upvoteIndex != -1){
-                    if(req.body.voteType !== 'up')
-                        res.status(200).send('Not upvoted')
-                    else{
-                        reply.upvotes.splice(upvoteIndex, 1)
-                        query.replies.id(req.params['replyId']).upvotes = reply.upvotes
-                        query.save()
-                            .then(query => {
-                                res.status(200).send(query)
-                            }, err => next(err))
-                            .catch(err => next(err))
-                    }
-                }
-                else{
-                    if(req.body.voteType !== 'down')
-                        res.status(200).send('Not downvoted')
-                    else{
-                        reply.downvotes.splice(downvoteIndex, 1)
-                        query.replies.id(req.params['replyId']).downvotes = reply.downvotes
-                        query.save()
-                            .then(query => {
-                                res.status(200).send(query)
-                            }, err => next(err))
-                            .catch(err => next(err))
-                    }
-                }
-            }
-            else{
-                err = new Error(`Reply ${req.params['replyId']} not found`)
-                err.status = 404
-                return next(err)
-            }
-        }, err => next(err))
-        .catch(err => next(err))
+    res.status(405).send('DELETE operation not allowed')
 })
 
 module.exports = queryRouter
