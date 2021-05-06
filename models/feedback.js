@@ -6,11 +6,11 @@ const Feedback = new Schema({
         type: String,
         required: true
     },
-    content: {
+    email: {
         type: String,
         required: true
     },
-    userId: {
+    content: {
         type: String,
         required: true
     }

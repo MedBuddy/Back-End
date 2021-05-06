@@ -16,8 +16,7 @@ feedbackRouter.route('/')
       }, (err) => next(err))
       .catch((err) => next(err))
 })
-.post(authenticate.verifyUser, (req, res, next) => {
-    req.body.userId = req.user.userId
+.post((req, res, next) => {
     Feedback.create(req.body)
         .then((feedback) => {
             res.status(200).send(feedback)
@@ -29,6 +28,28 @@ feedbackRouter.route('/')
 })
 .delete((req, res, next) => {
     res.status(200).send('DELETE operation not supported')
+})
+
+feedbackRouter.route('/:feedbackId')
+.get(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+    Feedback.findById(req.params['feedbackId'])
+      .then((feedback) => {
+          res.status(200).send(feedback)
+      }, (err) => next(err))
+      .catch((err) => next(err))
+})
+.post((req, res, next) => {
+    res.status(200).send('POST operation not supported')
+})
+.put((req, res, next) => {
+    res.status(200).send('PUT operation not supported')
+})
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+    Feedback.findByIdAndRemove(req.params['feedbackId'])
+        .then((feedback) => {
+            res.status(200).send(feedback)
+        }, (err) => next(err))
+        .catch((err) => next(err))
 })
 
 module.exports = feedbackRouter
