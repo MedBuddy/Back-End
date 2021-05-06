@@ -45,6 +45,8 @@ queryRouter.route('/')
             files: files
         }
         Query.create(query)
+            .populate('userIcon')
+            .populate('replies.userIcon')
             .then((query) => {
                 res.status(200).send(query)
             }, err => next(err))
