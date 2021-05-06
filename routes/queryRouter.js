@@ -45,10 +45,14 @@ queryRouter.route('/')
             files: files
         }
         Query.create(query)
-            .populate('userIcon')
-            .populate('replies.userIcon')
             .then((query) => {
-                res.status(200).send(query)
+                Query.findById(query._id)
+                    .populate('userIcon')
+                    .populate('replies.userIcon')
+                    .then(query => {
+                        res.status(200).send(query)
+                    }, err => next(err))
+                    .catch(err => next(err))
             }, err => next(err))
             .catch(err => next(err))
     }
