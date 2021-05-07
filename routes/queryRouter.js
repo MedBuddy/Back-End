@@ -103,8 +103,10 @@ queryRouter.route('/:queryId')
                 }
                 else{
                     let files = []
-                    req.body.removed.split(' ').forEach(i => files.push(query.files[i]))
-                    fileUpload.deleteFiles(files, req.user.userId, 'queries')
+                    if(req.body.removed){
+                        req.body.removed.split(' ').forEach(i => files.push(query.files[i]))
+                        fileUpload.deleteFiles(files, req.user.userId, 'queries')
+                    }
                     files = query.files.filter(file => !files.includes(file))
                     for(let i in req.files){
                         for(let j = 0; j < req.files[i].length; j++){
