@@ -56,99 +56,117 @@ accountRouter.post('/login', (req, res, next) => {
 })
 
 accountRouter.post('/signup', (req, res, next) => {
-    let Account
-    if(req.body.type == 1) Account = User
-    else if(req.body.type == 2) Account = Doctor
+    let Account, Other
+    if(req.body.type == 1) Account = User, Other = Doctor
+    else if(req.body.type == 2) Account = Doctor, Other = User
     else return res.sendStatus(403)
-    Account.findOne({ username: req.body.username })
-      .then(async (account) => {
-        if(account){
-          if(account.activated)
-            res.status(200).send({resCode: -1, msg: "Username already exists!"})
-          else {
-            const salt = await bcrpyt.genSalt()
-            const hashedPassword = await bcrpyt.hash(req.body.password, salt)
-            var otp = ""
-            for(var i=1;i<=6;i++) 
-              otp += Math.floor(Math.random() * 10)
-            const hashedOtp = await bcrpyt.hash(otp, 10)
-            account.otp = hashedOtp
-            account.password = hashedPassword
-            account.email = req.body.email
-            account.save()
-              .then((account) => {
-                Account.findById(account._id)
-                  .then((account) => {
-                      sendEmail(account.email, 'MedBuddy Account Activation', getOTPMsg(account.username , otp))
-                      res.status(200).send({resCode: 1, msg: account._id})
-                  })
-              }, (err) => next(err))
-          }
-        }
-        else {
-          Account.findOne({ email: req.body.email })
-            .then(async (account) => {
-                if(account){
-                  if(account.activated)
-                    res.status(200).send({resCode: 0,msg: "Email already registered!"})
-                  else {
-                    const salt = await bcrpyt.genSalt()
-                    const hashedPassword = await bcrpyt.hash(req.body.password, salt)
-                    var otp = ""
-                    for(var i=1;i<=6;i++) 
-                      otp += Math.floor(Math.random() * 10)
-                    const hashedOtp = await bcrpyt.hash(otp, 10)
-                    account.otp = hashedOtp
-                    account.username = req.body.username
-                    account.password = hashedPassword
-                    account.save()
-                      .then((account) => {
-                        Account.findById(account._id)
-                          .then((account) => {
-                              sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
-                              res.status(200).send({resCode: 1, msg: account._id})
-                          }); 
-                      }, (err) => next(err))
-                  }
-                }
-                else{
-                  const salt = await bcrpyt.genSalt()
-                  const hashedPassword = await bcrpyt.hash(req.body.password, salt)
-                  var otp = ""
-                  for(var i=1;i<=6;i++) 
-                    otp += Math.floor(Math.random() * 10)
-                  const hashedOtp = await bcrpyt.hash(otp, 10)
-                  Image.create({ username: req.body.username })
-                      .then((image) => {
-                          Image.findById(image._id)
-                            .then((image) => {
-                                  account = { 
-                                      username: req.body.username,
-                                      password: hashedPassword,
-                                      email: req.body.email,
-                                      otp: hashedOtp,
-                                      image: image._id
-                                  }
-                                  Account.create(account)
-                                  .then((account) => {
-                                    Account.findById(account._id)
-                                    .then((account) => {
-                                      sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
-                                      res.status(200).send({resCode: 1, msg: account._id})
-                                      }) 
-                                      .catch((err) => next(err))
-                                    }, (err) => next(err))
-                                  .catch((err) => next(err))
-                            }) 
-                            .catch((err) => next(err))
-                      }, (err) => next(err))
-                      .catch((err) => next(err))
-                }
-            }, (err) => next(err))
-          .catch((err) => next(err))
-        }
-      }, (err) => next(err))
-      .catch((err) => next(err))
+	Admin.findOne({ username: req.body.username })
+		.then(account => {
+			if(account){
+				res.status(200).send({resCode: -1, msg: "Username already exists!"})
+			}
+			else{
+				Other.findOne({ username: req.body.username })
+					.then(account => {
+						if(account){
+							res.status(200).send({resCode: -1, msg: "Username already exists!"})
+						}
+						else{
+							Account.findOne({ username: req.body.username })
+							.then(async (account) => {
+								if(account){
+								if(account.activated)
+									res.status(200).send({resCode: -1, msg: "Username already exists!"})
+								else {
+									const salt = await bcrpyt.genSalt()
+									const hashedPassword = await bcrpyt.hash(req.body.password, salt)
+									var otp = ""
+									for(var i=1;i<=6;i++) 
+									otp += Math.floor(Math.random() * 10)
+									const hashedOtp = await bcrpyt.hash(otp, 10)
+									account.otp = hashedOtp
+									account.password = hashedPassword
+									account.email = req.body.email
+									account.save()
+									.then((account) => {
+										Account.findById(account._id)
+										.then((account) => {
+											sendEmail(account.email, 'MedBuddy Account Activation', getOTPMsg(account.username , otp))
+											res.status(200).send({resCode: 1, msg: account._id})
+										})
+									}, (err) => next(err))
+								}
+								}
+								else {
+								Account.findOne({ email: req.body.email })
+									.then(async (account) => {
+										if(account){
+										if(account.activated)
+											res.status(200).send({resCode: 0,msg: "Email already registered!"})
+										else {
+											const salt = await bcrpyt.genSalt()
+											const hashedPassword = await bcrpyt.hash(req.body.password, salt)
+											var otp = ""
+											for(var i=1;i<=6;i++) 
+											otp += Math.floor(Math.random() * 10)
+											const hashedOtp = await bcrpyt.hash(otp, 10)
+											account.otp = hashedOtp
+											account.username = req.body.username
+											account.password = hashedPassword
+											account.save()
+											.then((account) => {
+												Account.findById(account._id)
+												.then((account) => {
+													sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
+													res.status(200).send({resCode: 1, msg: account._id})
+												}); 
+											}, (err) => next(err))
+										}
+										}
+										else{
+										const salt = await bcrpyt.genSalt()
+										const hashedPassword = await bcrpyt.hash(req.body.password, salt)
+										var otp = ""
+										for(var i=1;i<=6;i++) 
+											otp += Math.floor(Math.random() * 10)
+										const hashedOtp = await bcrpyt.hash(otp, 10)
+										Image.create({ username: req.body.username })
+											.then((image) => {
+												Image.findById(image._id)
+													.then((image) => {
+														account = { 
+															username: req.body.username,
+															password: hashedPassword,
+															email: req.body.email,
+															otp: hashedOtp,
+															image: image._id
+														}
+														Account.create(account)
+														.then((account) => {
+															Account.findById(account._id)
+															.then((account) => {
+															sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
+															res.status(200).send({resCode: 1, msg: account._id})
+															}) 
+															.catch((err) => next(err))
+															}, (err) => next(err))
+														.catch((err) => next(err))
+													}) 
+													.catch((err) => next(err))
+											}, (err) => next(err))
+											.catch((err) => next(err))
+										}
+									}, (err) => next(err))
+								.catch((err) => next(err))
+								}
+							}, (err) => next(err))
+							.catch((err) => next(err))
+						}
+					}, err => next(err))
+					.catch(err => next(err))
+			}
+		}, err => next(err))
+		.catch(err => next(err))
 })
 
 accountRouter.post('/otp', (req, res, next) => {
