@@ -25,7 +25,7 @@ accountRouter.post('/login', (req, res, next) => {
           if(account){
             if(!account.activated)
               	res.status(200).send({resCode: -1, msg: 'Invalid User'})
-			else if(Account == Doctor && !account.verified)
+			else if(Account === Doctor && !account.verified)
 				res.status(200).send({resCode: -1, msg: 'Account not verified'})
             else if(await bcrpyt.compare(req.body.password, account.password)){
                const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image._id })
@@ -41,6 +41,8 @@ accountRouter.post('/login', (req, res, next) => {
                 if(account){
                   if(!account.activated)
                     res.status(200).send({resCode: -1, msg: 'Invalid User'})
+				  else if(Account === Doctor && !account.verified)
+					res.status(200).send({resCode: -1, msg: 'Account not verified'})
                   else if(await bcrpyt.compare(req.body.password, account.password)){
                       const token = authenticate.getToken({ userId: account._id, type: req.body.type, username: account.username, icon: account.image._id })
                       res.status(200).send({resCode: 1, msg: 'Logged in', token: token, username: account.username, userIcon: account.image.url})
