@@ -1,8 +1,6 @@
-const express = require('express')
-const app = express()
+const app = require('express')()
 
-const http = require('http')
-const server = http.createServer(app)
+const server = require('http').createServer(app)
 const PORT = 5000
 
 const io = require('socket.io')(server, {

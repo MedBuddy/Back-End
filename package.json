@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "vc": "node videoCall"
+    "vc": "node videoCall",
+    "chat": "node chat"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
