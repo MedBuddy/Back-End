@@ -54,7 +54,13 @@ postRouter.route('/')
         }
         Post.create(post)
             .then((post) => {
-                res.status(200).send(post)
+                Post.findById(post._id)
+                    .populate('userIcon')
+                    .populate('comments.userIcon')
+                    .then(post => {
+                        res.status(200).send(post)
+                    }, err => next(err))
+                    .catch(err => next(err))
             }, err => next(err))
             .catch(err => next(err))
     }
@@ -104,8 +110,12 @@ postRouter.route('/:postId')
                     return next(err)
                 }
                 else{
-                    fileUpload.deleteFiles(post.files, req.user.userId, 'posts')
                     let files = []
+                    if(req.body.removed){
+                        req.body.removed.split(' ').forEach(i => files.push(post.files[i]))
+                        fileUpload.deleteFiles(files, req.user.userId, 'posts')
+                    }
+                    files = post.files.filter(file => !files.includes(file))
                     for(let i in req.files){
                         for(let j = 0; j < req.files[i].length; j++){
                             files.push(host + fileUpload.getFilePath(req.files[i][j].path))
@@ -169,7 +179,13 @@ postRouter.route('/:postId/comments')
             post.comments.push(comment)
             post.save()
                 .then(post => {
-                    res.status(200).send(post)
+                    Post.findById(post._id)
+                        .populate('userIcon')
+                        .populate('comments.userIcon')
+                        .then(post => {
+                            res.status(200).send(post)
+                        }, err => next(err))
+                        .catch(err => next(err))
                 }, err => next(err))
                 .catch(err => next(err))
         }, err => next(err))
@@ -184,7 +200,13 @@ postRouter.route('/:postId/comments')
             post.comments = []
             post.save()
                 .then(post => {
-                    res.status(200).send(post)
+                    Post.findById(post._id)
+                        .populate('userIcon')
+                        .populate('comments.userIcon')
+                        .then(post => {
+                            res.status(200).send({post: post, msg: 'Comments Deleted'})
+                        }, err => next(err))
+                        .catch(err => next(err))
                 }, err => next(err))
                 .catch(err => next(err))
         }, err => next(err))
@@ -217,14 +239,18 @@ postRouter.route('/:postId/comments/:commentId')
                     post.comments.id(req.params['commentId']).content = req.body.content
                     post.save()
                         .then(post => {
-                            res.status(200).send(post)
+                            Post.findById(post._id)
+                                .populate('userIcon')
+                                .populate('comments.userIcon')
+                                .then(post => {
+                                    res.status(200).send({post: post, msg: 'Comment Edited'})
+                                }, err => next(err))
+                                .catch(err => next(err))
                         }, err => next(err))
                         .catch(err => next(err))
                 }
                 else{
-                    err = new Error(`You are not allowed to edit this comment!`)
-                    err.status = 404
-                    return next(err)
+                    res.status(403).send('You are not allowed to edit this comment')
                 }
             }
             else{
@@ -243,14 +269,18 @@ postRouter.route('/:postId/comments/:commentId')
                     post.comments.id(req.params['commentId']).remove()
                     post.save()
                         .then(post => {
-                            res.status(200).send(post)
+                            Post.findById(post._id)
+                                .populate('userIcon')
+                                .populate('comments.userIcon')
+                                .then(post => {
+                                    res.status(200).send({post: post, msg: 'Comment Deleted'})
+                                }, err => next(err))
+                                .catch(err => next(err))
                         }, err => next(err))
                         .catch(err => next(err))
                 }
                 else{
-                    err = new Error(`You are not allowed to delete this comment!`)
-                    err.status = 404
-                    return next(err)
+                    res.status(403).send(`You are not allowed to delete this comment!`)
                 }
             }
             else{
@@ -272,14 +302,16 @@ postRouter.route('/:postId/likes')
 })
 .post(authenticate.verifyUser, (req, res, next) => {
     Post.findById(req.params['postId'])
+        .populate('userIcon')
+        .populate('comments.userIcon')
         .then((post) => {
             if(post.likes.includes(req.user.userId))
-                res.status(200).send('Already Liked')
+                res.status(200).send({post: post, msg: 'Already Liked!'})
             else{
                 post.likes.push(req.user.userId)
                 post.save()
                     .then(post => {
-                        res.status(200).send(post)
+                        res.status(200).send({post: post, msg: 'Liked successfully!'})
                     }, err => next(err))
                     .catch(err => next(err))
             }
@@ -289,22 +321,8 @@ postRouter.route('/:postId/likes')
 .put((req, res, next) => {
     res.status(405).send('PUT operation not allowed')
 })
-.delete(authenticate.verifyUser, (req, res, next) => {
-    Post.findById(req.params['postId'])
-        .then((post) => {
-            let index = post.likes.indexOf(req.user.userId)
-            if(index == -1)
-                res.status(200).send('Not Liked')
-            else{
-                post.likes.splice(index, 1)
-                post.save()
-                    .then(post => {
-                        res.status(200).send(post)
-                    }, err => next(err))
-                    .catch(err => next(err))
-            }
-        }, err => next(err))
-        .catch(err => next(err))
+.delete((req, res, next) => {
+    res.status(405).send('DELETE operation not allowed')
 })
 
 module.exports = postRouter
