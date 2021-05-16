@@ -49,6 +49,14 @@ doctorRouter.post('/license', fileUpload.uploadPdf.single('license'), (req, res,
     }
 })
 
+doctorRouter.post('/messages', authenticate.verifyUser, (req, res, next) => {
+    Message.find({ roomId: req.body.doctor + '-' + req.body.user })
+        .then(messages => {
+            res.status(200).send(messages)
+        }, err => next(err))
+        .catch(err => next(err))
+})
+
 doctorRouter.get('/:doctorId', authenticate.verifyUser, (req, res, next) => {
     Doctor.findById(req.params['doctorId'])
         .populate('image')
@@ -159,14 +167,6 @@ doctorRouter.get('/:doctorId/chats', authenticate.verifyUser, authenticate.verif
                 return (users[0] === req.user.username)
             })
             res.status(200).send(chats)
-        }, err => next(err))
-        .catch(err => next(err))
-})
-
-doctorRouter.get('/getMessages', authenticate.verifyUser, (req, res, next) => {
-    Message.find({ roomId: req.body.doctor + '-' + req.body.user })
-        .then(messages => {
-            res.status(200).send(messages)
         }, err => next(err))
         .catch(err => next(err))
 })

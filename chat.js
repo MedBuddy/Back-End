@@ -28,8 +28,8 @@ io.on('connection', socket => {
 
     socket.on('message', data => {
         io.sockets.in(`room-${data.roomId}`).emit('message', {
-            msg: data.msg,
-            username: data.username
+            message: data.msg,
+            sender: data.username
         })
         const message = {
             message: data.msg,
