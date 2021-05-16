@@ -65,6 +65,14 @@ const Doctor = new Schema({
     mobile: {
         type: String,
         default: ''
+    },
+    hospital: {
+        type: String,
+        default: ''
+    },
+    rating: {
+        type: String,
+        default: '3'
     }
 },{
     timestamps: true

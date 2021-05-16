@@ -3,6 +3,8 @@ const app = require('express')()
 const server = require('http').createServer(app)
 const PORT = 5001
 
+const Message = require('./models/message')
+
 const io = require('socket.io')(server, {
     cors: {
         origin: 'http://localhost:3000',
@@ -21,6 +23,12 @@ io.on('connection', socket => {
             msg: data.msg,
             username: data.username
         })
+        const message = {
+            message: data.msg,
+            sender: data.username,
+            roomId: data.roomId
+        }
+        Message.create(message)
     })
 })
 

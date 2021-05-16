@@ -7,6 +7,7 @@ const fileUpload = require('../shared/fileUploadConfig')
 
 const Doctor = require('../models/doctor')
 const Review = require('../models/review')
+const Message = require('../models/message')
 
 const doctorRouter = express.Router()
 doctorRouter.use(bodyParser.json())
@@ -98,6 +99,7 @@ doctorRouter.route('/:doctorId/reviews')
 doctorRouter.route('/:doctorId/reviews/:reviewId')
 .get(authenticate.verifyUser, (req, res, next) => {
     Review.findById(req.params['reviewId'])
+        .populate('userId')
         .then((reviews) => {
             res.status(200).send(reviews)
         }, (err) => next(err))
@@ -145,6 +147,18 @@ doctorRouter.route('/:doctorId/reviews/:reviewId')
                 err.status = 404
                 return next(err)
             }
+        }, err => next(err))
+        .catch(err => next(err))
+})
+
+doctorRouter.get('/:doctorId/chats', authenticate.verifyUser, authenticate.verifyDoctor, (req, res, next) => {
+    Message.find({})
+        .then(messages => {
+            const chats = messages.filter(message => {
+                let users = message.roomId.split('-')
+                return (users[1] === req.user.username || users[2] === req.user.username)
+            })
+            res.status(200).send(chats)
         }, err => next(err))
         .catch(err => next(err))
 })
