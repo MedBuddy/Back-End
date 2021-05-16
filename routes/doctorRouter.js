@@ -156,9 +156,17 @@ doctorRouter.get('/:doctorId/chats', authenticate.verifyUser, authenticate.verif
         .then(messages => {
             const chats = messages.filter(message => {
                 let users = message.roomId.split('-')
-                return (users[1] === req.user.username || users[2] === req.user.username)
+                return (users[0] === req.user.username)
             })
             res.status(200).send(chats)
+        }, err => next(err))
+        .catch(err => next(err))
+})
+
+doctorRouter.get('/getMessages', authenticate.verifyUser, (req, res, next) => {
+    Message.find({ roomId: req.body.doctor + '-' + req.body.user })
+        .then(messages => {
+            res.status(200).send(messages)
         }, err => next(err))
         .catch(err => next(err))
 })

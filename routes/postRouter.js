@@ -126,7 +126,7 @@ postRouter.route('/:postId')
                     post.files = files
                     post.save()
                         .then((post) => {
-                            res.status(200).send(post)
+                            res.status(200).send({post: post, msg: 'Post Edited'})
                         }, err => next(err))
                         .catch(err => next(err))
                 }
@@ -305,16 +305,15 @@ postRouter.route('/:postId/likes')
         .populate('userIcon')
         .populate('comments.userIcon')
         .then((post) => {
-            if(post.likes.includes(req.user.userId))
-                res.status(200).send({post: post, msg: 'Already Liked!'})
-            else{
-                post.likes.push(req.user.userId)
-                post.save()
-                    .then(post => {
-                        res.status(200).send({post: post, msg: 'Liked successfully!'})
-                    }, err => next(err))
-                    .catch(err => next(err))
-            }
+            if(post.likes.includes(req.user.username))
+                post.likes.splice(post.likes.indexOf(req.user.username), 1)
+            else
+                post.likes.push(req.user.username)
+            post.save()
+                .then(post => {
+                    res.status(200).send({post: post, msg: 'Liked successfully!'})
+                }, err => next(err))
+                .catch(err => next(err))
         }, err => next(err))
         .catch(err => next(err))
 })
