@@ -90,8 +90,12 @@ doctorRouter.get('/:doctorId', authenticate.verifyUser, (req, res, next) => {
 doctorRouter.route('/:doctorId/reviews')
 .get(authenticate.verifyUser, (req, res, next) => {
     Review.find({ doctorId: req.params['doctorId'] })
+        .populate('userId')
         .then((reviews) => {
-            res.status(200).send(reviews)
+            Review.populate(reviews, 'userId.image')
+            .then(reviews => {
+                res.status(200).send(reviews)
+            })
         }, (err) => next(err))
         .catch((err) => next(err))
 })
@@ -99,18 +103,35 @@ doctorRouter.route('/:doctorId/reviews')
     Review.findOne({ userId: req.user.userId })
         .then(review => {
             if(review){
-                err = new Error(`You can post a review only once!`)
-                err.status = 404
-                return next(err)
+                res.status(200).send({resCode: 0, msg: 'You can post a review only once!'})
             }
             else{
                 req.body.userId = req.user.userId
                 req.body.doctorId = req.params['doctorId']
                 Review.create(req.body)
                     .then((review) => {
-                        Review.findById(review._id)
-                            .then((review) => {
-                                res.status(200).send(review)
+                        Review.find({ doctorId: req.params['doctorId'] })
+                            .then(reviews => {
+                                Doctor.findById(req.params['doctorId'])
+                                    .then(doctor => {
+                                        let n = reviews.length
+                                        let rating = parseFloat(doctor.rating)
+                                        let newRating = ((rating * n) + review.rating) / (n+1)
+                                        doctor.rating = newRating.toString()
+                                        doctor.save()
+                                            .then(doctor => {
+                                                Review.findById(review._id)
+                                                    .populate('userId')
+                                                    .then((review) => {
+                                                        Review.populate(review, 'userId.image')
+                                                        .then(review => {
+                                                            res.status(200).send({resCode: 1, review: review})
+                                                        })
+                                                    }, err => next(err))
+                                                    .catch(err => next(err))
+                                            }, err => next(err))
+                                            .catch(err => next(err))
+                                    })
                             }, err => next(err))
                             .catch(err => next(err))
                     }, (err) => next(err))
