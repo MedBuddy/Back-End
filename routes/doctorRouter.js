@@ -140,10 +140,10 @@ doctorRouter.route('/:doctorId/reviews')
         })
 })
 .put((req, res, next) => {
-    res.status(200).send('PUT operation not supported')
+    res.status(405).send('PUT operation not supported')
 })
 .delete((req, res, next) => {
-    res.status(200).send('DELETE operation not supported')
+    res.status(405).send('DELETE operation not supported')
 })
 
 doctorRouter.route('/:doctorId/reviews/:reviewId')
@@ -166,9 +166,24 @@ doctorRouter.route('/:doctorId/reviews/:reviewId')
                 review.comment = req.body.comment
                 review.save()
                     .then((review) => {
-                        Review.findById(review._id)
-                            .then(review => {
-                                res.status(200).send(review)
+                        Review.find({ doctorId: req.params['doctorId'] })
+                            .then(reviews => {
+                                let mean = 0
+                                reviews.forEach(r => mean += r.rating)
+                                mean /= reviews.length
+                                Doctor.findByIdAndUpdate(req.params['doctorId'], { rating: mean.toString() })
+                                    .then(doctor => {
+                                        Review.findById(review._id)
+                                            .populate('userId')
+                                            .then((review) => {
+                                                Review.populate(review, 'userId.image')
+                                                .then(review => {
+                                                    res.status(200).send(review)
+                                                })
+                                            }, err => next(err))
+                                            .catch(err => next(err))
+                                    }, err => next(err))
+                                    .catch(err => next(err))
                             }, err => next(err))
                             .catch(err => next(err))
                     }, err => next(err))
@@ -176,7 +191,7 @@ doctorRouter.route('/:doctorId/reviews/:reviewId')
             }
             else{
                 err = new Error(`You are not allowed to edit this review!`)
-                err.status = 404
+                err.status = 403
                 return next(err)
             }
         }, err => next(err))
