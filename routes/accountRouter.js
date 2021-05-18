@@ -143,7 +143,9 @@ accountRouter.post('/signup', (req, res, next) => {
 															password: hashedPassword,
 															email: req.body.email,
 															otp: hashedOtp,
-															image: image._id
+															image: image._id,
+															firstname: req.body.firstname,
+															lastname: req.body.lastname
 														}
 														Account.create(account)
 														.then((account) => {

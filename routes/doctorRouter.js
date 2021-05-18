@@ -188,7 +188,18 @@ doctorRouter.route('/:doctorId/reviews/:reviewId')
             if(review.userId == req.user.userId){
                 review.remove()
                     .then((resp) => {
-                        res.status(200).send(resp)
+                        Review.find({ doctorId: req.params['doctorId'] })
+                            .then(reviews => {
+                                let mean = 0
+                                reviews.forEach(r => mean += r.rating)
+                                mean /= reviews.length
+                                Doctor.findByIdAndUpdate(req.params['doctorId'], { rating: mean.toString() })
+                                    .then(doctor => {
+                                        res.status(200).send('Rating updated!')
+                                    }, err => next(err))
+                                    .catch(err => next(err))
+                            }, err => next(err))
+                            .catch(err => next(err))
                     }, err => next(err))
                     .catch(err => next(err))
             }

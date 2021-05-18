@@ -36,7 +36,7 @@ adminRouter.post('/signup', authenticate.verifyUser, authenticate.verifyAdmin, (
                 else{
                   const salt = await bcrpyt.genSalt()
                   const hashedPassword = await bcrpyt.hash(req.body.password, salt)
-                  Image.create({})
+                  Image.create({ username: req.body.username })
                     .then(image => {
                         Image.findById(image._id)
                           .then(image => {
