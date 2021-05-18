@@ -105,27 +105,27 @@ accountRouter.post('/signup', (req, res, next) => {
 								Account.findOne({ email: req.body.email })
 									.then(async (account) => {
 										if(account){
-										if(account.activated)
-											res.status(200).send({resCode: 0,msg: "Email already registered!"})
-										else {
-											const salt = await bcrpyt.genSalt()
-											const hashedPassword = await bcrpyt.hash(req.body.password, salt)
-											var otp = ""
-											for(var i=1;i<=6;i++) 
-											otp += Math.floor(Math.random() * 10)
-											const hashedOtp = await bcrpyt.hash(otp, 10)
-											account.otp = hashedOtp
-											account.username = req.body.username
-											account.password = hashedPassword
-											account.save()
-											.then((account) => {
-												Account.findById(account._id)
+											if(account.activated)
+												res.status(200).send({resCode: 0,msg: "Email already registered!"})
+											else {
+												const salt = await bcrpyt.genSalt()
+												const hashedPassword = await bcrpyt.hash(req.body.password, salt)
+												var otp = ""
+												for(var i=1;i<=6;i++) 
+												otp += Math.floor(Math.random() * 10)
+												const hashedOtp = await bcrpyt.hash(otp, 10)
+												account.otp = hashedOtp
+												account.username = req.body.username
+												account.password = hashedPassword
+												account.save()
 												.then((account) => {
-													sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
-													res.status(200).send({resCode: 1, msg: account._id})
-												}); 
-											}, (err) => next(err))
-										}
+													Account.findById(account._id)
+													.then((account) => {
+														sendEmail(req.body.email, 'MedBuddy Account Activation', getOTPMsg(account.username, otp))
+														res.status(200).send({resCode: 1, msg: account._id})
+													}); 
+												}, (err) => next(err))
+											}
 										}
 										else{
 										const salt = await bcrpyt.genSalt()
