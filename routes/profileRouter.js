@@ -20,10 +20,14 @@ profileRouter.route('/details')
     else if(req.user.type == 2) Profile = Doctor
     else return res.sendStatus(403)
     Profile.findById(req.user.userId)
+        .populate('image')
         .then((profile) => {
             res.status(200).send(profile)
         }, (err) => next(err))
         .catch((err) => next(err))
+})
+.post((req, res, next) => {
+    res.status(405).send('POST operation not supported')
 })
 .put(authenticate.verifyUser, (req, res, next) => {
     let Profile
@@ -33,12 +37,16 @@ profileRouter.route('/details')
     Profile.findByIdAndUpdate(req.user.userId, req.body)
         .then((profile) => {
             Profile.findById(profile._id)
-              .then((profile) => {
-                  res.status(200).send(profile)
-              }, (err) => next(err))
-              .catch((err) => next(err))
+                .populate('image')
+                .then((profile) => {
+                    res.status(200).send(profile)
+                }, (err) => next(err))
+                .catch((err) => next(err))
         }, (err) => next(err))
         .catch((err) => next(err))
+})
+.delete((req, res, next) => {
+    res.status(405).send('DELETE operation not supported')
 })
 
 profileRouter.post('/imageUpload', authenticate.verifyUser, fileUpload.uploadImage.single('image'), (req, res, next) => {
@@ -55,7 +63,7 @@ profileRouter.post('/imageUpload', authenticate.verifyUser, fileUpload.uploadIma
                     .then(image => {
                         Image.findById(image._id)
                             .then(image => res.status(200).send(image),
-                                  err => next(err))
+                                    err => next(err))
                             .catch(err => next(err))
                     })
             }, (err) => next(err))
