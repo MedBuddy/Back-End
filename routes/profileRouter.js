@@ -18,6 +18,7 @@ profileRouter.route('/details')
     let Profile
     if(req.user.type == 1) Profile = User
     else if(req.user.type == 2) Profile = Doctor
+    else if(req.user.type == 3) Profile = Admin
     else return res.sendStatus(403)
     Profile.findById(req.user.userId)
         .populate('image')
@@ -33,6 +34,7 @@ profileRouter.route('/details')
     let Profile
     if(req.user.type == 1) Profile = User
     else if(req.user.type == 2) Profile = Doctor
+    else if(req.user.type == 3) Profile = Admin
     else return res.sendStatus(403)
     Profile.findByIdAndUpdate(req.user.userId, req.body)
         .then((profile) => {
