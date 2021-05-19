@@ -39,8 +39,8 @@ const User = new Schema({
         ref: 'Image'
     },
     dob: {
-        type: Date,
-        default: new Date()
+        type: String,
+        default: ''
     },
     gender: {
         type: String,

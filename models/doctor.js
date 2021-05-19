@@ -51,8 +51,8 @@ const Doctor = new Schema({
         default: ''
     },
     dob: {
-        type: Date,
-        default: new Date()
+        type: String,
+        default: ''
     },
     gender: {
         type: String,
