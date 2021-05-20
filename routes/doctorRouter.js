@@ -14,7 +14,7 @@ const doctorRouter = express.Router()
 doctorRouter.use(bodyParser.json())
 
 doctorRouter.get('/', authenticate.verifyUser, (req, res, next) => {
-    Doctor.find({})
+    Doctor.find({ activated: true, verified: true })
       .populate('image')
       .then((doctors) => {
           res.status(200).send(doctors)
@@ -23,7 +23,7 @@ doctorRouter.get('/', authenticate.verifyUser, (req, res, next) => {
 })
 
 doctorRouter.get('/unverified', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
-    Doctor.find({ verified: false })
+    Doctor.find({ activated: true, verified: false })
         .populate('image')
         .then((doctors) => {
             res.status(200).send(doctors)
